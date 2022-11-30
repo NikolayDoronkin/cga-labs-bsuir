@@ -16,7 +16,7 @@ public class DdaGraphicServiceImpl implements GraphicService {
 
 		var length = Math.max(deltaX, deltaY);
 		if (length == 0) {
-			drawPoint(pixels, roundedStartX + 650, roundedStartY + 350);
+			drawPoint(pixels, roundedStartX, roundedStartY);
 
 			return;
 		}
@@ -27,7 +27,7 @@ public class DdaGraphicServiceImpl implements GraphicService {
 		var x = startPoint.getX();
 		var y = startPoint.getY();
 		for (int i = 0; i <= length; i++) {
-			drawPoint(pixels, (int) Math.round(x + 650), (int) Math.round(y + 350));
+			drawPoint(pixels, (int) Math.round(x), (int) Math.round(y));
 			x += dX;
 			y += dY;
 		}

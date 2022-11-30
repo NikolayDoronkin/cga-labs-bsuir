@@ -3,14 +3,15 @@ package com.example.cgalabs.engine;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.RealMatrix;
 
+import static com.example.cgalabs.engine.EngineBuilder.*;
+
 public class CameraService {
 	private Vector3D position = new Vector3D(0.0, 0.0, 1.0);
 	private Vector3D focus = new Vector3D(0.0, 0.0, 0.0);
-	private Vector3D worldUp = new Vector3D(0.0, 1.0, 0.0);
+	private Vector3D worldUp = new Vector3D(0.0, 1.0, 1000.0);
 
 	private Double yaw = -90.0;
 	private Double pitch = 0.0;
-	private Double zoom = 45.0;
 
 	private final Double mouseSensitivity = 0.5;
 	private final Double zoomSensitivity = 0.1;
@@ -19,10 +20,10 @@ public class CameraService {
 	private Vector3D up;
 	private Vector3D right;
 
-	private static final Double MAX_ZOOM = 180.0;
+	private static final Double MAX_ZOOM = 1000.0;
 
 	{
-		updateCameraVectors();
+		updateCameraVectors(false);
 	}
 
 	public RealMatrix move(Double xOffset, Double yOffset) {
@@ -34,22 +35,30 @@ public class CameraService {
 		pitch -= yOffset * mouseSensitivity;
 
 		if (constrainPitch) {
-			if (pitch > 89.0) pitch = 89.0;
-			if (pitch < -89.0) pitch = -89.0;
+			if (pitch > 89.9) pitch = 89.9;
+			if (pitch < -89.9) pitch = -89.9;
 		}
-		return updateCameraVectors();
+		return updateCameraVectors(true);
 	}
 
-	public RealMatrix zoom(Double offset) {
-		zoom -= offset * zoomSensitivity;
+	public void zoom(Double offset) {
+//		zoom -= offset * zoomSensitivity;
 
-		if (zoom < 1f) zoom = 1.0;
-		if (zoom > MAX_ZOOM) zoom = MAX_ZOOM;
+//		if (zoom < 1f) zoom = 1.0;
+//		if (zoom > MAX_ZOOM) zoom = MAX_ZOOM;
 
-		return EngineBuilder.buildToClipSpaceMatrix(zoom);
+		EngineBuilder.INIT_CAMERA_POSITION = new Vector3D(
+				INIT_CAMERA_POSITION.getX(),
+				INIT_CAMERA_POSITION.getY(),
+				INIT_CAMERA_POSITION.getZ() + Math.signum(offset)
+		);
+		EngineBuilder.buildToViewSpaceMatrix(INIT_CAMERA_POSITION, INIT_MODEL_POSITION, UP_CAMERA_VECTOR);
+
+//		return EngineBuilder.buildToClipSpaceMatrix(zoom);
+//		return updateCameraVectors(true);
 	}
 
-	private RealMatrix updateCameraVectors() {
+	private RealMatrix updateCameraVectors(boolean flag) {
 		front = new Vector3D(
 				Math.cos(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)),
 				Math.sin(Math.toRadians(pitch)),
@@ -60,6 +69,11 @@ public class CameraService {
 		right = front.crossProduct(worldUp).normalize();
 		up = right.crossProduct(front).normalize();
 
-		return EngineBuilder.buildToViewSpaceMatrix(position, focus, up);
+		if (flag) {
+			return EngineBuilder.buildToViewSpaceMatrix(position, focus, up);
+		}
+		else return EngineBuilder.toViewSpaceMatrix;
+
+//		return EngineBuilder.buildToViewSpaceMatrix(position, focus, up);
 	}
 }

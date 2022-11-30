@@ -8,6 +8,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -18,23 +19,23 @@ public class EngineBuilder {
 		WindowConstants.WINDOW_HEIGHT = 720.0;
 		WindowConstants.WINDOW_WIDTH = 1280.0;
 		WindowConstants.WINDOW_ASPECT = WindowConstants.WINDOW_WIDTH / WindowConstants.WINDOW_HEIGHT;
-		DISTANCE_TO_NEAR = 10f;
-		DISTANCE_TO_FAR = 1000f;
+		DISTANCE_TO_NEAR = 0.1f;
+		DISTANCE_TO_FAR = 100f;
 	}
 
-	private static Vector3D UP_CAMERA_VECTOR = new Vector3D(0f, 1f, 0f);
-	private static Vector3D INIT_MODEL_POSITION = new Vector3D(0f, 0f, 0f);
-	private static Vector3D INIT_CAMERA_POSITION = new Vector3D(0f, 0f, 1f);
+	public static Vector3D UP_CAMERA_VECTOR = new Vector3D(0f, 1f, 0f);
+	public static Vector3D INIT_MODEL_POSITION = new Vector3D(0f, 0f, 0f);
+	public static Vector3D INIT_CAMERA_POSITION = new Vector3D(0f, 0f, 30f);
 
-	private static RealMatrix toViewSpaceMatrix = buildToViewSpaceMatrix(INIT_CAMERA_POSITION, INIT_MODEL_POSITION, UP_CAMERA_VECTOR);
-	private static RealMatrix toClipSpaceMatrix = buildToClipSpaceMatrix(20.0);
+	public static RealMatrix toViewSpaceMatrix = buildToViewSpaceMatrix(INIT_CAMERA_POSITION, INIT_MODEL_POSITION, UP_CAMERA_VECTOR);
+	private static RealMatrix toClipSpaceMatrix = buildToClipSpaceMatrix(45.0);
 	private static RealMatrix toScreenSpaceMatrix = buildToScreenSpaceMatrix();
 
 	private static final Float DISTANCE_TO_NEAR;
 	private static final Float DISTANCE_TO_FAR;
 
 	public List<Polygon> fillAllSpaces(ObjectData data) {
-		var polygons = data.getPolygons();
+		var polygons = new ArrayList<>(data.getPolygons());
 
 		polygons.forEach(polygon -> {
 			fillSpaces(polygon.getFirstPolygon());
@@ -75,8 +76,8 @@ public class EngineBuilder {
 		}
 	}
 
-	public static RealMatrix buildToClipSpaceMatrix(Double zoom) {
-		var halfOfFovTangent = Math.tan(Math.toRadians(zoom / 2));
+	public static RealMatrix buildToClipSpaceMatrix(Double fov) {
+		var halfOfFovTangent = Math.tan(Math.toRadians(fov / 2));
 
 		var firstColumnComponent = 1 / (WindowConstants.WINDOW_ASPECT * halfOfFovTangent);
 		var secondColumnComponent = 1 / halfOfFovTangent;
@@ -97,7 +98,7 @@ public class EngineBuilder {
 		var firstColumn = Point4D.of((WindowConstants.WINDOW_WIDTH / 2), 0.0, 0.0, 0.0);
 		var secondColumn = Point4D.of(0.0, -(WindowConstants.WINDOW_HEIGHT / 2), 0.0, 0.0);
 		var thirdColumn = Point4D.of(0.0, 0.0, 1.0, 0.0);
-		var fourthColumn = Point4D.of((WindowConstants.WINDOW_WIDTH / 2), (WindowConstants.WINDOW_HEIGHT / 2), 0.0, 0.0);
+		var fourthColumn = Point4D.of((WindowConstants.WINDOW_WIDTH / 2), (WindowConstants.WINDOW_HEIGHT / 2), 0.0, 1.0);
 
 		return buildMatrix(firstColumn, secondColumn, thirdColumn, fourthColumn);
 	}
@@ -109,26 +110,42 @@ public class EngineBuilder {
 	}
 
 	private void calcViewSpacePointVector(PolygonPoint polygonPoint) {
-		polygonPoint.setViewSpacePointVector(
+		/*polygonPoint.setViewSpacePointVector(
 				buildPoint4D(
 						buildMatrix(
-								polygonPoint.getLocalSpacePoint()).multiply(toViewSpaceMatrix)));
+								polygonPoint.getLocalSpacePoint()).multiply(toViewSpaceMatrix)));*/
+		polygonPoint.setViewSpacePointVector(
+				buildPoint4DTest(
+						toViewSpaceMatrix.multiply(
+								buildMatrixTest(polygonPoint.getLocalSpacePoint()))));
 	}
 
 	private void calcClipSpacePointVector(PolygonPoint polygonPoint) {
-		/*double[] row = buildMatrix(polygonPoint.getViewSpacePointVector())
-				.multiply(toClipSpaceMatrix).getRow(0);
-		Point4D calculatedVector = Point4D.of(row[0], row[1], row[2], row[3]);
-		polygonPoint.setClipSpacePointVector(calculatedVector.divide(calculatedVector.getW()));*/
+//		double[] row = buildMatrix(polygonPoint.getViewSpacePointVector())
+//				.multiply(toClipSpaceMatrix).getRow(0);
+		var column = toClipSpaceMatrix.multiply(buildMatrixTest(polygonPoint.getViewSpacePointVector())).getColumn(0);
+		Point4D calculatedVector = Point4D.of(column[0], column[1], column[2], column[3]);
+		Point4D dividedVector = calculatedVector.divide(calculatedVector.getW());
+//		polygonPoint.setClipSpacePointVector(buildPoint4DTest(toClipSpaceMatrix.multiply(buildMatrixTest(dividedVector))));
+//		polygonPoint.setClipSpacePointVector(buildPoint4DTest(toClipSpaceMatrix.multiply(buildMatrixTest(dividedVector))));
+//		polygonPoint.setClipSpacePointVector(buildPoint4D(buildMatrix(dividedVector).multiply(toClipSpaceMatrix)));
 
-		polygonPoint.setClipSpacePointVector(
-				buildPoint4D(buildMatrix(polygonPoint.getViewSpacePointVector()).multiply(toClipSpaceMatrix)));
+		polygonPoint.setClipSpacePointVector(dividedVector);
+
+		/*polygonPoint.setClipSpacePointVector(
+				buildPoint4D(buildMatrix(
+						polygonPoint.getViewSpacePointVector()).multiply(toClipSpaceMatrix)));*/
 	}
 
 	private void calcScreenSpacePointVector(PolygonPoint polygonPoint) {
-		polygonPoint.setScreenSpacePointVector(
+		/*polygonPoint.setScreenSpacePointVector(
 				buildPoint2D(buildMatrix(
-						polygonPoint.getClipSpacePointVector()).multiply(toScreenSpaceMatrix)));
+						polygonPoint.getClipSpacePointVector()).multiply(toScreenSpaceMatrix)));*/
+
+		polygonPoint.setScreenSpacePointVector(
+				buildPoint2DTest(
+						toScreenSpaceMatrix.multiply(
+								buildMatrixTest(polygonPoint.getClipSpacePointVector()))));
 	}
 
 	private static RealMatrix buildMatrix(Point4D firstColumn, Point4D secondColumn, Point4D thirdColumn, Point4D fourthColumn) {
@@ -144,15 +161,37 @@ public class EngineBuilder {
 				{point4D.getX(), point4D.getY(), point4D.getZ(), point4D.getW() == null ? 0 : point4D.getW()}});
 	}
 
+	private RealMatrix buildMatrixTest(Point4D point4D) {
+		return MatrixUtils.createRealMatrix(new double[][]
+				{
+						{point4D.getX()},
+						{point4D.getY()},
+						{point4D.getZ()},
+						{point4D.getW() == null ? 0 : point4D.getW()}
+				});
+	}
+
 	private Point4D buildPoint4D(RealMatrix matrix) {
 		var row = matrix.getRow(0);
 
 		return Point4D.of(row[0], row[1], row[2], row[3]);
 	}
 
+	private Point4D buildPoint4DTest(RealMatrix matrix) {
+		var column = matrix.getColumn(0);
+
+		return Point4D.of(column[0], column[1], column[2], column[3]);
+	}
+
 	private Point2D buildPoint2D(RealMatrix matrix) {
 		var row = matrix.getRow(0);
 
 		return new Point2D(row[0], row[1]);
+	}
+
+	private Point2D buildPoint2DTest(RealMatrix matrix) {
+		var column = matrix.getColumn(0);
+
+		return new Point2D(column[0], column[1]);
 	}
 }

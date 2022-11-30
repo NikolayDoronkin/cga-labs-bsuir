@@ -32,7 +32,7 @@ public class BrezenhemGraphicServiceImpl implements GraphicService {
 		int x = (int) startPoint.getX();
 		int y = (int) startPoint.getY();
 		int err = el / 2;
-		drawPoint(pixels, x + 650, y + 350);
+		drawPoint(pixels, x, y);
 
 		for (int t = 0; t < el; t++) {
 			err -= es;
@@ -44,7 +44,7 @@ public class BrezenhemGraphicServiceImpl implements GraphicService {
 				x += pdx;
 				y += pdy;
 			}
-			drawPoint(pixels, x + 650, y + 350);
+			drawPoint(pixels, x, y);
 		}
 	}
 

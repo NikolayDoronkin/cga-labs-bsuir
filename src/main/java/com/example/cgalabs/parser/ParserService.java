@@ -53,7 +53,7 @@ public class ParserService {
 				.x(Double.valueOf(line.get(1)))
 				.y(Double.valueOf(line.get(2)))
 				.z(Double.valueOf(line.get(3)))
-				.w(line.size() == 5 ? Double.valueOf(line.get(3)) : null)
+				.w(line.size() == 5 ? Double.valueOf(line.get(3)) : 1)
 				.build();
 	}
 
