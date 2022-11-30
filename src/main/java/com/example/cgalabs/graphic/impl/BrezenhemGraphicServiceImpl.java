@@ -2,12 +2,10 @@ package com.example.cgalabs.graphic.impl;
 
 import com.example.cgalabs.graphic.GraphicService;
 import javafx.geometry.Point2D;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 
 public class BrezenhemGraphicServiceImpl implements GraphicService {
 	@Override
-	public void drawLine(Point2D startPoint, Point2D endPoint, GraphicsContext graphicsContext) {
+	public void drawLine(Point2D startPoint, Point2D endPoint, int[] pixels) {
 		var dx = (int) (endPoint.getX() - startPoint.getX());
 		var dy = (int) (endPoint.getY() - startPoint.getY());
 
@@ -34,10 +32,9 @@ public class BrezenhemGraphicServiceImpl implements GraphicService {
 		int x = (int) startPoint.getX();
 		int y = (int) startPoint.getY();
 		int err = el / 2;
-		graphicsContext.getPixelWriter().setColor(x, y, Color.BLACK);
+		drawPoint(pixels, x + 650, y + 350);
 
-		int t = 0;
-		while (t < el) {
+		for (int t = 0; t < el; t++) {
 			err -= es;
 			if (err < 0) {
 				err += el;
@@ -47,12 +44,11 @@ public class BrezenhemGraphicServiceImpl implements GraphicService {
 				x += pdx;
 				y += pdy;
 			}
-			graphicsContext.getPixelWriter().setColor(x, y, Color.BLACK);
+			drawPoint(pixels, x + 650, y + 350);
 		}
 	}
 
 	private int sign(int x) {
-//		if (x > 0) return  1 ; else if (x < 0) return  -1 ; else return 0;
 		return Integer.compare(x, 0);
 	}
 }

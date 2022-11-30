@@ -2,13 +2,10 @@ package com.example.cgalabs.graphic.impl;
 
 import com.example.cgalabs.graphic.GraphicService;
 import javafx.geometry.Point2D;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 
 public class DdaGraphicServiceImpl implements GraphicService {
-
 	@Override
-	public void drawLine(Point2D startPoint, Point2D endPoint, GraphicsContext graphicsContext) {
+	public void drawLine(Point2D startPoint, Point2D endPoint, int[] pixels) {
 		var roundedStartX = (int) Math.round(startPoint.getX());
 		var roundedStartY = (int) Math.round(startPoint.getY());
 		var roundedEndX = (int) Math.round(endPoint.getX());
@@ -19,7 +16,8 @@ public class DdaGraphicServiceImpl implements GraphicService {
 
 		var length = Math.max(deltaX, deltaY);
 		if (length == 0) {
-			graphicsContext.getPixelWriter().setColor(roundedStartX + 650, roundedStartY + 350, Color.BLACK);
+			drawPoint(pixels, roundedStartX + 650, roundedStartY + 350);
+
 			return;
 		}
 
@@ -29,7 +27,7 @@ public class DdaGraphicServiceImpl implements GraphicService {
 		var x = startPoint.getX();
 		var y = startPoint.getY();
 		for (int i = 0; i <= length; i++) {
-			graphicsContext.getPixelWriter().setColor((int) Math.round(x + 650), (int) Math.round(y + 350), Color.BLACK);
+			drawPoint(pixels, (int) Math.round(x + 650), (int) Math.round(y + 350));
 			x += dX;
 			y += dY;
 		}
