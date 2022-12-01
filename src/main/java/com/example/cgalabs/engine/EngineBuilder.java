@@ -19,13 +19,13 @@ public class EngineBuilder {
 		WindowConstants.WINDOW_HEIGHT = 720.0;
 		WindowConstants.WINDOW_WIDTH = 1280.0;
 		WindowConstants.WINDOW_ASPECT = WindowConstants.WINDOW_WIDTH / WindowConstants.WINDOW_HEIGHT;
-		DISTANCE_TO_NEAR = 0.1f;
+		DISTANCE_TO_NEAR = 1f;
 		DISTANCE_TO_FAR = 100f;
 	}
 
 	public static Vector3D UP_CAMERA_VECTOR = new Vector3D(0f, 1f, 0f);
 	public static Vector3D INIT_MODEL_POSITION = new Vector3D(0f, 0f, 0f);
-	public static Vector3D INIT_CAMERA_POSITION = new Vector3D(0f, 0f, 30f);
+	public static Vector3D INIT_CAMERA_POSITION = new Vector3D(5f, 10f, -30f);
 
 	public static RealMatrix toViewSpaceMatrix = buildToViewSpaceMatrix(INIT_CAMERA_POSITION, INIT_MODEL_POSITION, UP_CAMERA_VECTOR);
 	private static RealMatrix toClipSpaceMatrix = buildToClipSpaceMatrix(45.0);
@@ -110,10 +110,6 @@ public class EngineBuilder {
 	}
 
 	private void calcViewSpacePointVector(PolygonPoint polygonPoint) {
-		/*polygonPoint.setViewSpacePointVector(
-				buildPoint4D(
-						buildMatrix(
-								polygonPoint.getLocalSpacePoint()).multiply(toViewSpaceMatrix)));*/
 		polygonPoint.setViewSpacePointVector(
 				buildPoint4DTest(
 						toViewSpaceMatrix.multiply(
@@ -121,27 +117,14 @@ public class EngineBuilder {
 	}
 
 	private void calcClipSpacePointVector(PolygonPoint polygonPoint) {
-//		double[] row = buildMatrix(polygonPoint.getViewSpacePointVector())
-//				.multiply(toClipSpaceMatrix).getRow(0);
 		var column = toClipSpaceMatrix.multiply(buildMatrixTest(polygonPoint.getViewSpacePointVector())).getColumn(0);
 		Point4D calculatedVector = Point4D.of(column[0], column[1], column[2], column[3]);
 		Point4D dividedVector = calculatedVector.divide(calculatedVector.getW());
-//		polygonPoint.setClipSpacePointVector(buildPoint4DTest(toClipSpaceMatrix.multiply(buildMatrixTest(dividedVector))));
-//		polygonPoint.setClipSpacePointVector(buildPoint4DTest(toClipSpaceMatrix.multiply(buildMatrixTest(dividedVector))));
-//		polygonPoint.setClipSpacePointVector(buildPoint4D(buildMatrix(dividedVector).multiply(toClipSpaceMatrix)));
 
 		polygonPoint.setClipSpacePointVector(dividedVector);
-
-		/*polygonPoint.setClipSpacePointVector(
-				buildPoint4D(buildMatrix(
-						polygonPoint.getViewSpacePointVector()).multiply(toClipSpaceMatrix)));*/
 	}
 
 	private void calcScreenSpacePointVector(PolygonPoint polygonPoint) {
-		/*polygonPoint.setScreenSpacePointVector(
-				buildPoint2D(buildMatrix(
-						polygonPoint.getClipSpacePointVector()).multiply(toScreenSpaceMatrix)));*/
-
 		polygonPoint.setScreenSpacePointVector(
 				buildPoint2DTest(
 						toScreenSpaceMatrix.multiply(

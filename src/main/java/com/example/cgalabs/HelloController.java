@@ -68,7 +68,7 @@ public class HelloController {
 		lastX = event.getX();
 		lastY = event.getY();
 
-		cameraService.move(-xOffset, -yOffset);
+		cameraService.move(xOffset, yOffset);
 
 		handle();
 	}
