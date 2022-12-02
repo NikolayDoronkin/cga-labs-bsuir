@@ -1,20 +1,25 @@
 package com.example.cgalabs.graphic;
 
-import javafx.geometry.Point2D;
-import javafx.scene.canvas.GraphicsContext;
+import com.example.cgalabs.model.Color;
+import com.example.cgalabs.model.Pixel;
+import javafx.geometry.Point3D;
+
+import java.util.List;
 
 public interface GraphicService {
-	int PIXEL_COLOR_ARGB = 255 << 24 | (0 << 16) | (0 << 8) | 0;
-//	void drawLine(Point2D startPoint, Point2D endPoint, GraphicsContext graphicsContext);
-	void drawLine(Point2D startPoint, Point2D endPoint, int[] pixels);
+	void drawLine(Point3D startPoint, Point3D endPoint, Color color, List<Pixel> sidePixels, int[] pixels);
 
-	default void drawPoint(int[] arr, int x, int y) {
+	default void drawPoint(int[] arr, int x, int y, double z, Color color, List<Pixel> sidePixels) {
 		var pixelIndex = (x % 1280) + (y * 1280);
 
 		if (pixelIndex < 0 || pixelIndex >= arr.length) {
 			return;
 		}
 
-		arr[(x % 1280) + (y * 1280)] = PIXEL_COLOR_ARGB;
+		arr[(x % 1280) + (y * 1280)] = argbInt(color);
+	}
+
+	private int argbInt(Color color) {
+		return color.a() << 24 | (color.r() << 16) | (color.g() << 8) | color.b();
 	}
 }

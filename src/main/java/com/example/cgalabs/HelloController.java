@@ -31,15 +31,16 @@ public class HelloController {
 
 	private static final String PATH1 = "C:\\Users\\nicol\\OneDrive\\AKG\\cga-labs\\skull.obj";
 	private static final String PATH2 = "C:\\Users\\nicol\\OneDrive\\AKG\\CGA\\src\\main\\resources\\com\\example\\cga\\models\\Skull_OBJ.OBJ";
-	private static final String PATH3 = "C:\\Users\\nicol\\OneDrive\\AKG\\1\\src\\main\\resources\\african_head.obj";
+	private static final String PATH3 = "src/main/resources/african_head.obj";
 	private static final String PATH4 = "C:\\Users\\nicol\\OneDrive\\AKG\\1\\src\\main\\resources\\moon.obj";
 	private static final String PATH5 = "C:\\Users\\nicol\\OneDrive\\AKG\\1\\src\\main\\resources\\cube.obj";
 	private static final String PATH6 = "C:\\Users\\nicol\\OneDrive\\AKG\\1\\src\\main\\resources\\uploads_files_3862208_Cube.obj";
-	private static final String PATH7 = "C:\\Users\\nicol\\OneDrive\\AKG\\1\\src\\main\\resources\\test.obj";
+	private static final String PATH7 = "src/main/resources/test.obj";
+	private static final String PATH8 = "src/main/resources/head.obj";
 
 	static {
 		try {
-			objectData = parserService.readFromFile(PATH2);
+			objectData = parserService.readFromFile(PATH8);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

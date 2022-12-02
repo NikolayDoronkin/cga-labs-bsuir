@@ -26,7 +26,8 @@ public class CameraService {
 		INIT_CAMERA_POSITION = new Vector3D(
 				CameraSphere.getCoordinateX(),
 				CameraSphere.getCoordinateY(),
-				CameraSphere.tau > 1  || CameraSphere.fi > 1 ? (-1) *  coordinateZ : coordinateZ);
+//				CameraSphere.tau > 1  || CameraSphere.fi > 1 ? (-1) *  coordinateZ : coordinateZ);
+				coordinateZ);
 
 		return EngineBuilder.buildToViewSpaceMatrix(INIT_CAMERA_POSITION, INIT_MODEL_POSITION, UP_CAMERA_VECTOR);
 	}

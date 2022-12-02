@@ -2,6 +2,7 @@ package com.example.cgalabs.engine;
 
 import com.example.cgalabs.model.*;
 import javafx.geometry.Point2D;
+import javafx.geometry.Point3D;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -25,7 +26,7 @@ public class EngineBuilder {
 
 	public static Vector3D UP_CAMERA_VECTOR = new Vector3D(0f, 1f, 0f);
 	public static Vector3D INIT_MODEL_POSITION = new Vector3D(0f, 0f, 0f);
-	public static Vector3D INIT_CAMERA_POSITION = new Vector3D(5f, 10f, -30f);
+	public static Vector3D INIT_CAMERA_POSITION = new Vector3D(0.1f, 0.1f, 15f);
 
 	public static RealMatrix toViewSpaceMatrix = buildToViewSpaceMatrix(INIT_CAMERA_POSITION, INIT_MODEL_POSITION, UP_CAMERA_VECTOR);
 	private static RealMatrix toClipSpaceMatrix = buildToClipSpaceMatrix(45.0);
@@ -126,7 +127,7 @@ public class EngineBuilder {
 
 	private void calcScreenSpacePointVector(PolygonPoint polygonPoint) {
 		polygonPoint.setScreenSpacePointVector(
-				buildPoint2DTest(
+				buildPoint3DTest(
 						toScreenSpaceMatrix.multiply(
 								buildMatrixTest(polygonPoint.getClipSpacePointVector()))));
 	}
@@ -172,9 +173,9 @@ public class EngineBuilder {
 		return new Point2D(row[0], row[1]);
 	}
 
-	private Point2D buildPoint2DTest(RealMatrix matrix) {
+	private Point3D buildPoint3DTest(RealMatrix matrix) {
 		var column = matrix.getColumn(0);
 
-		return new Point2D(column[0], column[1]);
+		return new Point3D(column[0], column[1], column[2]);
 	}
 }

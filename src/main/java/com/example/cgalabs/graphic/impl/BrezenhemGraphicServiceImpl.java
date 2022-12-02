@@ -1,54 +1,100 @@
 package com.example.cgalabs.graphic.impl;
 
 import com.example.cgalabs.graphic.GraphicService;
-import javafx.geometry.Point2D;
+import com.example.cgalabs.model.Color;
+import com.example.cgalabs.model.Pixel;
+import javafx.geometry.Point3D;
+
+import java.util.List;
+
+import static org.apache.commons.math3.util.FastMath.abs;
 
 public class BrezenhemGraphicServiceImpl implements GraphicService {
+
 	@Override
-	public void drawLine(Point2D startPoint, Point2D endPoint, int[] pixels) {
-		var dx = (int) (endPoint.getX() - startPoint.getX());
-		var dy = (int) (endPoint.getY() - startPoint.getY());
+	public void drawLine(Point3D startPoint, Point3D endPoint, Color color, List<Pixel> sidePixels, int[] pixels) {
+		var x1 = (int) startPoint.getX();
+		var y1 = (int) startPoint.getY();
+		var z1 = startPoint.getZ();
 
-		var incx = sign(dx);
-		var incy = sign(dy);
+		var x2 = (int) endPoint.getX();
+		var y2 = (int) endPoint.getY();
+		var z2 = endPoint.getZ();
 
-		dx = Math.abs(dx);
-		dy = Math.abs(dy);
+		var dx = abs(x2 - x1);
+		var dy = abs(y2 - y1);
+		var dz = abs(z2 - z1);
 
-		int pdx, pdy, es, el;
+		var xs = x2 > x1 ? 1 : -1;
+		var ys = y2 > y1 ? 1 : -1;
+		var zs = z2 > z1 ? 1 : -1;
 
-		if (dx > dy) {
-			pdx = incx;
-			pdy = 0;
-			es = dy;
-			el = dx;
-		} else {
-			pdx = 0;
-			pdy = incy;
-			es = dx;
-			el = dy;
-		}
+		if (dx >= dy && dx >= dz) {
+			var p1 = 2 * dy - dx;
+			var p2 = 2 * dz - dx;
 
-		int x = (int) startPoint.getX();
-		int y = (int) startPoint.getY();
-		int err = el / 2;
-		drawPoint(pixels, x, y);
+			while (x1 != x2) {
+				x1 += xs;
 
-		for (int t = 0; t < el; t++) {
-			err -= es;
-			if (err < 0) {
-				err += el;
-				x += incx;
-				y += incy;
-			} else {
-				x += pdx;
-				y += pdy;
+				if (p1 >= 0) {
+					y1 += ys;
+					p1 -= 2 * dx;
+				}
+
+				if (p2 >= 0) {
+					z1 += zs;
+					p2 -= 2 * dx;
+				}
+
+				p1 += 2 * dy;
+				p2 += 2 * dz;
+
+				drawPoint(pixels, x1, y1, z1, color, sidePixels);
 			}
-			drawPoint(pixels, x, y);
-		}
-	}
+		} else if (dy >= dx && dy >= dz) {
+			var p1 = 2 * dx - dy;
+			var p2 = 2 * dz - dy;
 
-	private int sign(int x) {
-		return Integer.compare(x, 0);
+			while (y1 != y2) {
+				y1 += ys;
+
+				if (p1 >= 0) {
+					x1 += xs;
+					p1 -= 2 * dy;
+				}
+
+				if (p2 >= 0) {
+					z1 += zs;
+					p2 -= 2 * dy;
+				}
+
+				p1 += 2 * dx;
+				p2 += 2 * dz;
+
+				drawPoint(pixels, x1, y1, z1, color, sidePixels);
+			}
+		} else {
+			var p1 = 2 * dy - dz;
+			var p2 = 2 * dx - dz;
+
+			while (z1 < z2) {
+				z1 += zs;
+
+				if (p1 >= 0) {
+					y1 += ys;
+					p1 -= 2 * dz;
+				}
+
+				if (p2 >= 0) {
+					x1 += xs;
+					p2 -= 2 * dz;
+				}
+
+				p1 += 2 * dy;
+				p2 += 2 * dx;
+
+				drawPoint(pixels, x1, y1, z1, color, sidePixels);
+			}
+		}
 	}
 }
