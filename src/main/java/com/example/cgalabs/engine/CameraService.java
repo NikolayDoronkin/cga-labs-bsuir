@@ -8,15 +8,16 @@ import static java.lang.Math.*;
 
 public class CameraService {
 
+	private static final Double MOUSE_SENSITIVITY = 0.25;
+
 	static {
-		CameraSphere.setCoordinates(0.1, 0.1, 30);
+		CameraSphere.setCoordinates(0.1, 0.1, 3);
 	}
 
 	public RealMatrix move(Double xOffset, Double yOffset) {
 		var previousRadius = CameraSphere.radius;
-		Double mouseSensitivity = 0.25;
-		var x = CameraSphere.getCoordinateX() - xOffset * mouseSensitivity;
-		var y = CameraSphere.getCoordinateY() + yOffset * mouseSensitivity;
+		var x = CameraSphere.getCoordinateX() - xOffset * MOUSE_SENSITIVITY;
+		var y = CameraSphere.getCoordinateY() + yOffset * MOUSE_SENSITIVITY;
 
 		CameraSphere.setCoordinates(x, y, CameraSphere.getCoordinateZ());
 
@@ -34,7 +35,7 @@ public class CameraService {
 
 	public RealMatrix zoom(Double offset) {
 		CameraSphere.setRadius(CameraSphere.getCoordinateX(), CameraSphere.getCoordinateY(),
-				CameraSphere.getCoordinateZ() + signum(offset));
+				CameraSphere.getCoordinateZ() + signum(offset) * MOUSE_SENSITIVITY);
 
 		INIT_CAMERA_POSITION = new Vector3D(
 				CameraSphere.getCoordinateX(),

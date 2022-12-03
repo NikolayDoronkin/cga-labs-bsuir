@@ -2,7 +2,9 @@ package com.example.cgalabs;
 
 import com.example.cgalabs.engine.CameraService;
 import com.example.cgalabs.engine.EngineBuilder;
-import com.example.cgalabs.graphic.DrawerService;
+import com.example.cgalabs.graphic.drawer.DrawerService;
+import com.example.cgalabs.graphic.drawer.PlaneShadingDrawerService;
+import com.example.cgalabs.graphic.drawer.WireDrawerService;
 import com.example.cgalabs.model.ObjectData;
 import com.example.cgalabs.parser.ParserService;
 import javafx.fxml.FXML;
@@ -24,7 +26,7 @@ public class HelloController {
 	private static final ParserService parserService = new ParserService();
 	private static final EngineBuilder engineBuilder = new EngineBuilder();
 	private static final CameraService cameraService = new CameraService();
-	private static final DrawerService drawerService = new DrawerService();
+	private static final DrawerService drawerService = new PlaneShadingDrawerService();
 
 	private Double lastX = 0.0;
 	private Double lastY = 0.0;
@@ -32,7 +34,7 @@ public class HelloController {
 	private static final String PATH1 = "C:\\Users\\nicol\\OneDrive\\AKG\\cga-labs\\skull.obj";
 	private static final String PATH2 = "C:\\Users\\nicol\\OneDrive\\AKG\\CGA\\src\\main\\resources\\com\\example\\cga\\models\\Skull_OBJ.OBJ";
 	private static final String PATH3 = "src/main/resources/african_head.obj";
-	private static final String PATH4 = "C:\\Users\\nicol\\OneDrive\\AKG\\1\\src\\main\\resources\\moon.obj";
+	private static final String PATH4 = "src/main/resources/moon.obj";
 	private static final String PATH5 = "C:\\Users\\nicol\\OneDrive\\AKG\\1\\src\\main\\resources\\cube.obj";
 	private static final String PATH6 = "C:\\Users\\nicol\\OneDrive\\AKG\\1\\src\\main\\resources\\uploads_files_3862208_Cube.obj";
 	private static final String PATH7 = "src/main/resources/test.obj";
@@ -40,7 +42,7 @@ public class HelloController {
 
 	static {
 		try {
-			objectData = parserService.readFromFile(PATH8);
+			objectData = parserService.readFromFile(PATH3);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

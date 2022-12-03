@@ -20,13 +20,13 @@ public class EngineBuilder {
 		WindowConstants.WINDOW_HEIGHT = 720.0;
 		WindowConstants.WINDOW_WIDTH = 1280.0;
 		WindowConstants.WINDOW_ASPECT = WindowConstants.WINDOW_WIDTH / WindowConstants.WINDOW_HEIGHT;
-		DISTANCE_TO_NEAR = 1f;
-		DISTANCE_TO_FAR = 100f;
+		DISTANCE_TO_NEAR = 200f;
+		DISTANCE_TO_FAR = 10000f;
 	}
 
 	public static Vector3D UP_CAMERA_VECTOR = new Vector3D(0f, 1f, 0f);
 	public static Vector3D INIT_MODEL_POSITION = new Vector3D(0f, 0f, 0f);
-	public static Vector3D INIT_CAMERA_POSITION = new Vector3D(0.1f, 0.1f, 15f);
+	public static Vector3D INIT_CAMERA_POSITION = new Vector3D(0.1f, 0.1f, 3f);
 
 	public static RealMatrix toViewSpaceMatrix = buildToViewSpaceMatrix(INIT_CAMERA_POSITION, INIT_MODEL_POSITION, UP_CAMERA_VECTOR);
 	private static RealMatrix toClipSpaceMatrix = buildToClipSpaceMatrix(45.0);
@@ -119,8 +119,8 @@ public class EngineBuilder {
 
 	private void calcClipSpacePointVector(PolygonPoint polygonPoint) {
 		var column = toClipSpaceMatrix.multiply(buildMatrixTest(polygonPoint.getViewSpacePointVector())).getColumn(0);
-		Point4D calculatedVector = Point4D.of(column[0], column[1], column[2], column[3]);
-		Point4D dividedVector = calculatedVector.divide(calculatedVector.getW());
+		var calculatedVector = Point4D.of(column[0], column[1], column[2], column[3]);
+		var dividedVector = calculatedVector.divide(calculatedVector.getW());
 
 		polygonPoint.setClipSpacePointVector(dividedVector);
 	}

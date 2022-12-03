@@ -1,12 +1,13 @@
 package com.example.cgalabs.model;
 
-import javafx.scene.paint.Color;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class Pixel {
 	private int x;
 	private int y;
-	private int z;
+	private double z;
 	private Color color;
 }
