@@ -14,6 +14,6 @@ public class Point4D {
 	private Double w;
 
 	public Point4D divide(Double w) {
-		return new Point4D(this.getX() / w, this.getY() / w, this.getZ() / w, this.getW() / w);
+		return new Point4D(this.getX() / w, this.getY() / w, this.getZ(), this.getW() / w);
 	}
 }

@@ -4,7 +4,6 @@ import com.example.cgalabs.engine.CameraService;
 import com.example.cgalabs.engine.EngineBuilder;
 import com.example.cgalabs.graphic.drawer.DrawerService;
 import com.example.cgalabs.graphic.drawer.PlaneShadingDrawerService;
-import com.example.cgalabs.graphic.drawer.WireDrawerService;
 import com.example.cgalabs.model.ObjectData;
 import com.example.cgalabs.parser.ParserService;
 import javafx.fxml.FXML;
@@ -31,18 +30,16 @@ public class HelloController {
 	private Double lastX = 0.0;
 	private Double lastY = 0.0;
 
-	private static final String PATH1 = "C:\\Users\\nicol\\OneDrive\\AKG\\cga-labs\\skull.obj";
-	private static final String PATH2 = "C:\\Users\\nicol\\OneDrive\\AKG\\CGA\\src\\main\\resources\\com\\example\\cga\\models\\Skull_OBJ.OBJ";
-	private static final String PATH3 = "src/main/resources/african_head.obj";
-	private static final String PATH4 = "src/main/resources/moon.obj";
-	private static final String PATH5 = "C:\\Users\\nicol\\OneDrive\\AKG\\1\\src\\main\\resources\\cube.obj";
-	private static final String PATH6 = "C:\\Users\\nicol\\OneDrive\\AKG\\1\\src\\main\\resources\\uploads_files_3862208_Cube.obj";
-	private static final String PATH7 = "src/main/resources/test.obj";
-	private static final String PATH8 = "src/main/resources/head.obj";
+	private static final String PATH1 = "src/main/resources/african_head.obj";
+	private static final String PATH2 = "src/main/resources/moon.obj";
+	private static final String PATH3 = "src/main/resources/cube.obj";
+	private static final String PATH4 = "src/main/resources/uploads_files_3862208_Cube.obj";
+	private static final String PATH5 = "src/main/resources/test.obj";
+	private static final String PATH6 = "src/main/resources/head.obj";
 
 	static {
 		try {
-			objectData = parserService.readFromFile(PATH3);
+			objectData = parserService.readFromFile(PATH1);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

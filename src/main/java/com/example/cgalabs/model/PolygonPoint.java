@@ -1,6 +1,5 @@
 package com.example.cgalabs.model;
 
-import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import lombok.Getter;
 import lombok.Setter;

@@ -1,7 +1,6 @@
 package com.example.cgalabs.engine;
 
 import com.example.cgalabs.model.*;
-import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,8 +19,8 @@ public class EngineBuilder {
 		WindowConstants.WINDOW_HEIGHT = 720.0;
 		WindowConstants.WINDOW_WIDTH = 1280.0;
 		WindowConstants.WINDOW_ASPECT = WindowConstants.WINDOW_WIDTH / WindowConstants.WINDOW_HEIGHT;
-		DISTANCE_TO_NEAR = 200f;
-		DISTANCE_TO_FAR = 10000f;
+		DISTANCE_TO_NEAR = 10f;
+		DISTANCE_TO_FAR = 1000f;
 	}
 
 	public static Vector3D UP_CAMERA_VECTOR = new Vector3D(0f, 1f, 0f);
@@ -140,37 +139,20 @@ public class EngineBuilder {
 				{firstColumn.getW(), secondColumn.getW(), thirdColumn.getW(), fourthColumn.getW()}});
 	}
 
-	private RealMatrix buildMatrix(Point4D point4D) {
-		return MatrixUtils.createRealMatrix(new double[][]{
-				{point4D.getX(), point4D.getY(), point4D.getZ(), point4D.getW() == null ? 0 : point4D.getW()}});
-	}
-
 	private RealMatrix buildMatrixTest(Point4D point4D) {
 		return MatrixUtils.createRealMatrix(new double[][]
 				{
 						{point4D.getX()},
 						{point4D.getY()},
 						{point4D.getZ()},
-						{point4D.getW() == null ? 0 : point4D.getW()}
+						{point4D.getW() == null ? 1 : point4D.getW()}
 				});
-	}
-
-	private Point4D buildPoint4D(RealMatrix matrix) {
-		var row = matrix.getRow(0);
-
-		return Point4D.of(row[0], row[1], row[2], row[3]);
 	}
 
 	private Point4D buildPoint4DTest(RealMatrix matrix) {
 		var column = matrix.getColumn(0);
 
 		return Point4D.of(column[0], column[1], column[2], column[3]);
-	}
-
-	private Point2D buildPoint2D(RealMatrix matrix) {
-		var row = matrix.getRow(0);
-
-		return new Point2D(row[0], row[1]);
 	}
 
 	private Point3D buildPoint3DTest(RealMatrix matrix) {

@@ -23,7 +23,7 @@ public class CameraSphere {
 
 	public static void setRadius(double x, double y, double z) {
 		var b = sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
-		radius = Math.max(b, 0.1);
+		radius = max(b, 0.1);
 	}
 
 	public static void setCoordinates(double x, double y, double z) {
@@ -34,5 +34,4 @@ public class CameraSphere {
 		fi = acos(cosFi);
 		tau = acos(z / radius);
 	}
-
 }

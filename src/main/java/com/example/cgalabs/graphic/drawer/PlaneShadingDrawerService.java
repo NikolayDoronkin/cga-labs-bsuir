@@ -11,7 +11,11 @@ import javafx.scene.canvas.GraphicsContext;
 import lombok.val;
 import org.apache.commons.math3.util.Pair;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.apache.commons.math3.util.FastMath.abs;
@@ -19,11 +23,12 @@ import static org.apache.commons.math3.util.FastMath.round;
 
 public class PlaneShadingDrawerService extends WireDrawerService {
 
-	private ZBuffer zBuffer = new ZBuffer(3000, 3000);
-	private Lighting lighting = new LambertLighting();
+	private final ZBuffer zBuffer = new ZBuffer(1280, 720);
+	private final Lighting lighting = new LambertLighting();
 
 	@Override
 	public void draw(List<Polygon> polygons, GraphicsContext graphicsContext) {
+		zBuffer.update();
 		super.draw(polygons, graphicsContext);
 	}
 
@@ -31,6 +36,7 @@ public class PlaneShadingDrawerService extends WireDrawerService {
 	protected void drawPolygon(Polygon polygon, int[] pixels, Color color, List<Pixel> sidePixels) {
 		var polygonColor = Optional.ofNullable(getPolygonColor(polygon)).orElse(DEFAULT_PIXEL_COLOR);
 		var sides = new ArrayList<Pixel>();
+
 		super.drawPolygon(polygon, pixels, polygonColor, sides);
 		drawInnerPolygonPixels(pixels, sides, polygonColor);
 	}
@@ -71,6 +77,7 @@ public class PlaneShadingDrawerService extends WireDrawerService {
 		var minAndMaxY = getMinMaxY(sidePixels);
 		var minY = minAndMaxY.getKey();
 		var maxY = minAndMaxY.getValue();
+
 		if (minY == null || maxY == null) return;
 
 		for (int y = minY; y < maxY; y++) {
@@ -101,9 +108,9 @@ public class PlaneShadingDrawerService extends WireDrawerService {
 	}
 
 	private boolean validateCoordinate(int x, int y, double z) {
-		return (x >= 1 && x <= zBuffer.getWidth()) &&
-				(y >= 1 && y <= zBuffer.getHeight()) &&
-				(z <= zBuffer.getValue(x, y) + 5);
+		return (x > 0 && x < zBuffer.getWidth()) &&
+				(y > 0 && y < zBuffer.getHeight()) &&
+				(z <= zBuffer.getValue(x, y));
 	}
 
 	private Pair<Integer, Integer> getMinMaxY(List<Pixel> sidePixels) {
@@ -115,7 +122,7 @@ public class PlaneShadingDrawerService extends WireDrawerService {
 	}
 
 	private Pair<Integer, Integer> getPair(List<Pixel> sortedSidesPixels) {
-		int size = sortedSidesPixels.size();
+		var size = sortedSidesPixels.size();
 
 		return !sortedSidesPixels.isEmpty()
 				? new Pair<>(sortedSidesPixels.get(0).getY(), sortedSidesPixels.get(size - 1).getY())
@@ -128,7 +135,7 @@ public class PlaneShadingDrawerService extends WireDrawerService {
 				.sorted(Comparator.comparing(Pixel::getX))
 				.toList();
 
-		int size = filteredSidesPixels.size();
+		var size = filteredSidesPixels.size();
 
 		return !filteredSidesPixels.isEmpty()
 				? new Pair<>(filteredSidesPixels.get(0), filteredSidesPixels.get(size - 1))
