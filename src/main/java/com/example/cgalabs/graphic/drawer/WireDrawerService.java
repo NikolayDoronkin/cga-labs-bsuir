@@ -20,7 +20,7 @@ public class WireDrawerService implements DrawerService{
 	protected static final Color DEFAULT_PIXEL_COLOR = new Color(128, 128, 128);
 
 	@Override
-	public void draw(List<Polygon> polygons, GraphicsContext graphicsContext) {
+	public void draw(List<Polygon> polygons, Point3D viewVector, GraphicsContext graphicsContext) {
 		var intBuffer = IntBuffer.allocate(1280 * 720);
 		var pixels = intBuffer.array();
 		var pixelBuffer = new PixelBuffer<>(1280, 720, intBuffer, PixelFormat.getIntArgbPreInstance());
@@ -28,17 +28,17 @@ public class WireDrawerService implements DrawerService{
 
 		polygons.stream()
 				.filter(this::isVisible)
-				.forEach(polygon -> drawPolygon(polygon, pixels));
+				.forEach(polygon -> drawPolygon(polygon, viewVector, pixels));
 
 		pixelBuffer.updateBuffer(buffer -> null);
 		graphicsContext.drawImage(image, 0.0, 0.0);
 	}
 
-	private void drawPolygon(Polygon polygon, int[] pixels) {
-		drawPolygon(polygon, pixels, DEFAULT_PIXEL_COLOR, new ArrayList<>());
+	private void drawPolygon(Polygon polygon, Point3D viewVector, int[] pixels) {
+		drawPolygon(polygon, viewVector, pixels, DEFAULT_PIXEL_COLOR, new ArrayList<>());
 	}
 
-	protected void drawPolygon(Polygon polygon, int[] pixels, Color color, List<Pixel> sidePixels) {
+	protected void drawPolygon(Polygon polygon, Point3D viewVector, int[] pixels, Color color, List<Pixel> sidePixels) {
 		drawLine(
 				polygon.getFirstPolygon().getScreenSpacePointVector(),
 				polygon.getSecondPolygon().getScreenSpacePointVector(),
@@ -83,7 +83,6 @@ public class WireDrawerService implements DrawerService{
 				thirdPointVector.getY() - firstPointVector.getY(),
 				thirdPointVector.getZ() - firstPointVector.getZ());
 
-		//возможно придется использовать самописный normalize
 		return firstVector.crossProduct(secondVector).normalize();
 
 	}

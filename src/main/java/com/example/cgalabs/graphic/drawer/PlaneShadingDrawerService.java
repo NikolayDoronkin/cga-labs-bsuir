@@ -1,7 +1,7 @@
 package com.example.cgalabs.graphic.drawer;
 
-import com.example.cgalabs.graphic.lighting.LambertLighting;
 import com.example.cgalabs.graphic.lighting.Lighting;
+import com.example.cgalabs.graphic.lighting.PhongLighting;
 import com.example.cgalabs.model.Color;
 import com.example.cgalabs.model.Pixel;
 import com.example.cgalabs.model.Polygon;
@@ -11,11 +11,7 @@ import javafx.scene.canvas.GraphicsContext;
 import lombok.val;
 import org.apache.commons.math3.util.Pair;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static org.apache.commons.math3.util.FastMath.abs;
@@ -24,33 +20,34 @@ import static org.apache.commons.math3.util.FastMath.round;
 public class PlaneShadingDrawerService extends WireDrawerService {
 
 	private final ZBuffer zBuffer = new ZBuffer(1280, 720);
-	private final Lighting lighting = new LambertLighting();
+//	private final Lighting lighting = new LambertLighting();
+	private final Lighting lighting = new PhongLighting();
 
 	@Override
-	public void draw(List<Polygon> polygons, GraphicsContext graphicsContext) {
+	public void draw(List<Polygon> polygons, Point3D viewVector, GraphicsContext graphicsContext) {
 		zBuffer.update();
-		super.draw(polygons, graphicsContext);
+		super.draw(polygons, viewVector, graphicsContext);
 	}
 
 	@Override
-	protected void drawPolygon(Polygon polygon, int[] pixels, Color color, List<Pixel> sidePixels) {
-		var polygonColor = Optional.ofNullable(getPolygonColor(polygon)).orElse(DEFAULT_PIXEL_COLOR);
+	protected void drawPolygon(Polygon polygon, Point3D viewVector, int[] pixels, Color color, List<Pixel> sidePixels) {
+		var polygonColor = Optional.ofNullable(getPolygonColor(polygon, viewVector)).orElse(DEFAULT_PIXEL_COLOR);
 		var sides = new ArrayList<Pixel>();
 
-		super.drawPolygon(polygon, pixels, polygonColor, sides);
+		super.drawPolygon(polygon, viewVector, pixels, polygonColor, sides);
 		drawInnerPolygonPixels(pixels, sides, polygonColor);
 	}
 
-	private Color getPolygonColor(Polygon polygon) {
+	private Color getPolygonColor(Polygon polygon, Point3D viewVector) {
 		var firstPointNormalVector = polygon.getFirstPolygon().getNormalVector();
 		var secondPointNormalVector = polygon.getSecondPolygon().getNormalVector();
 		var thirdPointNormalVector = polygon.getThirdPolygon().getNormalVector();
 
 		if (checkForNull(firstPointNormalVector, secondPointNormalVector, thirdPointNormalVector)) return null;
 
-		var firstPointColor = lighting.getPointColor(firstPointNormalVector, DEFAULT_PIXEL_COLOR);
-		var secondPointColor = lighting.getPointColor(secondPointNormalVector, DEFAULT_PIXEL_COLOR);
-		var thirdPointColor = lighting.getPointColor(thirdPointNormalVector, DEFAULT_PIXEL_COLOR);
+		var firstPointColor = lighting.getPointColor(firstPointNormalVector, viewVector, DEFAULT_PIXEL_COLOR);
+		var secondPointColor = lighting.getPointColor(secondPointNormalVector, viewVector, DEFAULT_PIXEL_COLOR);
+		var thirdPointColor = lighting.getPointColor(thirdPointNormalVector, viewVector, DEFAULT_PIXEL_COLOR);
 
 		return calcAverageColor(firstPointColor, secondPointColor, thirdPointColor);
 	}

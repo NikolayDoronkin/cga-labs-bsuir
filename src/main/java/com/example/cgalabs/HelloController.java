@@ -14,6 +14,8 @@ import javafx.scene.input.ScrollEvent;
 
 import java.io.IOException;
 
+import static com.example.cgalabs.engine.CameraService.*;
+
 public class HelloController {
 
 	@FXML
@@ -49,7 +51,7 @@ public class HelloController {
 		graphicsContext = canvas.getGraphicsContext2D();
 		graphicsContext.clearRect(0.0, 0.0, 1280, 720);
 		var polygons = engineBuilder.fillAllSpaces(objectData);
-		drawerService.draw(polygons, graphicsContext);
+		drawerService.draw(polygons, CAMERA_POSITION.multiply(-1),  graphicsContext);
 	}
 
 	@FXML
