@@ -29,7 +29,7 @@ public class ParserService {
 
 		Files.readAllLines(Path.of(filePath))
 				.stream()
-				.filter(line -> !line.contains(SPACE_REGEXP))
+//				.filter(line -> !line.contains(SPACE_REGEXP))
 				.map(this::parseLine)
 				.forEach(line -> {
 					switch (line.get(0)) {
@@ -53,7 +53,7 @@ public class ParserService {
 				.x(Double.valueOf(line.get(1)))
 				.y(Double.valueOf(line.get(2)))
 				.z(Double.valueOf(line.get(3)))
-				.w(line.size() == 5 ? Double.valueOf(line.get(3)) : 1)
+				.w(line.size() == 5 ? Double.parseDouble(line.get(4)) : 1)
 				.build();
 	}
 

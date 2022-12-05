@@ -32,14 +32,14 @@ public class CameraService {
 				CameraSphere.getCoordinateY(),
 				coordinateZ);
 
-		CAMERA_POSITION = buildPosition(INIT_CAMERA_POSITION);
-
 		EngineBuilder.buildToViewSpaceMatrix(INIT_CAMERA_POSITION, INIT_MODEL_POSITION, UP_CAMERA_VECTOR);
+
+		CAMERA_POSITION = buildPosition(INIT_CAMERA_POSITION);
 	}
 
 	public void zoom(Double offset) {
 		CameraSphere.setRadius(CameraSphere.getCoordinateX(), CameraSphere.getCoordinateY(),
-				CameraSphere.getCoordinateZ() + signum(offset) * MOUSE_SENSITIVITY);
+				CameraSphere.getCoordinateZ() - signum(offset) * MOUSE_SENSITIVITY);
 
 		INIT_CAMERA_POSITION = new Vector3D(
 				CameraSphere.getCoordinateX(),
@@ -47,9 +47,9 @@ public class CameraService {
 				CameraSphere.getCoordinateZ()
 		);
 
-		CAMERA_POSITION = buildPosition(INIT_CAMERA_POSITION);
-
 		EngineBuilder.buildToViewSpaceMatrix(INIT_CAMERA_POSITION, INIT_MODEL_POSITION, UP_CAMERA_VECTOR);
+
+		CAMERA_POSITION = buildPosition(INIT_CAMERA_POSITION);
 	}
 
 	private static Point3D buildPosition(Vector3D source) {

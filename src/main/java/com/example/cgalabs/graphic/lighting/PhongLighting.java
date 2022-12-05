@@ -21,15 +21,20 @@ public class PhongLighting implements Lighting{
 		var diffuseLight = calcDiffuseLight(normalVector, color);
 		var specularLight = calcSpecularLight(normalVector, viewVector);
 
-		var resultLightVector = ambientLight
-				.add(diffuseLight)
-				.add(specularLight);
+		var resultLightVector = add(ambientLight, diffuseLight, specularLight);
 
 		return new Color(
-				(int) min(resultLightVector.getX(), 255f),
-				(int) min(resultLightVector.getY(), 255f),
-				(int) min(resultLightVector.getZ(), 255f)
+				(int) min(resultLightVector.getX(), 255),
+				(int) min(resultLightVector.getY(), 255),
+				(int) min(resultLightVector.getZ(), 255)
 		);
+	}
+
+	private Point3D add(Point3D first, Point3D second, Point3D third) {
+		return new Point3D(
+				first.getX() + second.getX() + third.getX(),
+				first.getY() + second.getY() + third.getY(),
+				first.getZ() + second.getZ() + third.getZ());
 	}
 
 	private Point3D calcAmbientLight() {

@@ -3,6 +3,7 @@ package com.example.cgalabs;
 import com.example.cgalabs.engine.CameraService;
 import com.example.cgalabs.engine.EngineBuilder;
 import com.example.cgalabs.graphic.drawer.DrawerService;
+import com.example.cgalabs.graphic.drawer.PhongShadingDrawer;
 import com.example.cgalabs.graphic.drawer.PlaneShadingDrawerService;
 import com.example.cgalabs.model.ObjectData;
 import com.example.cgalabs.parser.ParserService;
@@ -27,7 +28,8 @@ public class HelloController {
 	private static final ParserService parserService = new ParserService();
 	private static final EngineBuilder engineBuilder = new EngineBuilder();
 	private static final CameraService cameraService = new CameraService();
-	private static final DrawerService drawerService = new PlaneShadingDrawerService();
+//	private static final DrawerService drawerService = new PlaneShadingDrawerService();
+	private static final DrawerService drawerService = new PhongShadingDrawer();
 
 	private Double lastX = 0.0;
 	private Double lastY = 0.0;

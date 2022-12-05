@@ -3,6 +3,7 @@ package com.example.cgalabs.graphic.drawer;
 import com.example.cgalabs.model.Color;
 import com.example.cgalabs.model.Pixel;
 import com.example.cgalabs.model.Polygon;
+import com.example.cgalabs.model.PolygonPoint;
 import javafx.geometry.Point3D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.PixelBuffer;
@@ -16,8 +17,9 @@ import java.util.List;
 
 import static java.lang.Math.abs;
 
-public class WireDrawerService implements DrawerService{
-	protected static final Color DEFAULT_PIXEL_COLOR = new Color(128, 128, 128);
+public class WireDrawerService implements DrawerService {
+	protected static final Color DEFAULT_PIXEL_COLOR = new Color(34, 34, 200);
+	protected static final Point3D DEFAULT_NORMAL_VECTOR = new Point3D(0, 0, 0);
 
 	@Override
 	public void draw(List<Polygon> polygons, Point3D viewVector, GraphicsContext graphicsContext) {
@@ -39,29 +41,59 @@ public class WireDrawerService implements DrawerService{
 	}
 
 	protected void drawPolygon(Polygon polygon, Point3D viewVector, int[] pixels, Color color, List<Pixel> sidePixels) {
-		drawLine(
-				polygon.getFirstPolygon().getScreenSpacePointVector(),
-				polygon.getSecondPolygon().getScreenSpacePointVector(),
+		drawSide(
+				polygon.getFirstPolygon(),
+				polygon.getSecondPolygon(),
 				color,
+				pixels,
 				sidePixels,
-				pixels
+				viewVector
 		);
 
-		drawLine(
-				polygon.getSecondPolygon().getScreenSpacePointVector(),
-				polygon.getThirdPolygon().getScreenSpacePointVector(),
+		drawSide(
+				polygon.getSecondPolygon(),
+				polygon.getThirdPolygon(),
 				color,
+				pixels,
 				sidePixels,
-				pixels
+				viewVector
 		);
 
-		drawLine(
-				polygon.getThirdPolygon().getScreenSpacePointVector(),
-				polygon.getFirstPolygon().getScreenSpacePointVector(),
+		drawSide(
+				polygon.getThirdPolygon(),
+				polygon.getFirstPolygon(),
 				color,
+				pixels,
 				sidePixels,
-				pixels
+				viewVector
 		);
+	}
+
+	protected void drawSide(
+			PolygonPoint firstSidePoint,
+			PolygonPoint secondSidePoint,
+			Color color,
+			int[] pixels,
+			List<Pixel> sidesPixels,
+			Point3D viewVector
+	) {
+		drawLine(
+				getPixel(firstSidePoint.getScreenSpacePointVector(), color),
+				getPixel(secondSidePoint.getScreenSpacePointVector(), color),
+				color,
+				sidesPixels,
+				pixels,
+				viewVector
+		);
+	}
+
+	private Pixel getPixel(Point3D screenSpacePointVector, Color color) {
+		return new Pixel(
+				(int) screenSpacePointVector.getX(),
+				(int) screenSpacePointVector.getY(),
+				screenSpacePointVector.getZ(),
+				color,
+				DEFAULT_NORMAL_VECTOR);
 	}
 
 	private boolean isVisible(Polygon polygon) {
@@ -87,13 +119,13 @@ public class WireDrawerService implements DrawerService{
 
 	}
 
-	public void drawLine(Point3D startPoint, Point3D endPoint, Color color, List<Pixel> sidePixels, int[] pixels) {
-		var x1 = (int) startPoint.getX();
-		var y1 = (int) startPoint.getY();
+	public void drawLine(Pixel startPoint, Pixel endPoint, Color color, List<Pixel> sidePixels, int[] pixels, Point3D viewVector) {
+		var x1 = startPoint.getX();
+		var y1 = startPoint.getY();
 		var z1 = startPoint.getZ();
 
-		var x2 = (int) endPoint.getX();
-		var y2 = (int) endPoint.getY();
+		var x2 = endPoint.getX();
+		var y2 = endPoint.getY();
 		var z2 = endPoint.getZ();
 
 		var dx = abs(x2 - x1);
@@ -124,7 +156,7 @@ public class WireDrawerService implements DrawerService{
 				p1 += 2 * dy;
 				p2 += 2 * dz;
 
-				drawPoint(pixels, x1, y1, z1, color, sidePixels);
+				drawPoint(pixels, x1, y1, z1, color, sidePixels, viewVector, DEFAULT_NORMAL_VECTOR);
 			}
 		} else if (dy >= dx && dy >= dz) {
 			var p1 = 2 * dx - dy;
@@ -146,7 +178,7 @@ public class WireDrawerService implements DrawerService{
 				p1 += 2 * dx;
 				p2 += 2 * dz;
 
-				drawPoint(pixels, x1, y1, z1, color, sidePixels);
+				drawPoint(pixels, x1, y1, z1, color, sidePixels, viewVector, DEFAULT_NORMAL_VECTOR);
 			}
 		} else {
 			var p1 = 2 * dy - dz;
@@ -168,12 +200,13 @@ public class WireDrawerService implements DrawerService{
 				p1 += 2 * dy;
 				p2 += 2 * dx;
 
-				drawPoint(pixels, x1, y1, z1, color, sidePixels);
+				drawPoint(pixels, x1, y1, z1, color, sidePixels, viewVector, DEFAULT_NORMAL_VECTOR);
 			}
 		}
 	}
 
-	protected void drawPoint(int[] arr, int x, int y, double z, Color color, List<Pixel> sidePixels) {
+	protected void drawPoint(int[] arr, int x, int y, double z, Color color, List<Pixel> sidePixels,
+							 Point3D viewVector, Point3D normalVector) {
 		var pixelIndex = (x % 1280) + (y * 1280);
 
 		if (pixelIndex < 0 || pixelIndex >= arr.length) {

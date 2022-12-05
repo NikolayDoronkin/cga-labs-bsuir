@@ -1,5 +1,6 @@
 package com.example.cgalabs.model;
 
+import javafx.geometry.Point3D;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -10,4 +11,5 @@ public class Pixel {
 	private int y;
 	private double z;
 	private Color color;
+	private Point3D normalVector;
 }

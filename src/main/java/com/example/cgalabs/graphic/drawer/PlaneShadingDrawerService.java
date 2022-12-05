@@ -19,9 +19,9 @@ import static org.apache.commons.math3.util.FastMath.round;
 
 public class PlaneShadingDrawerService extends WireDrawerService {
 
-	private final ZBuffer zBuffer = new ZBuffer(1280, 720);
+	protected final ZBuffer zBuffer = new ZBuffer(1280, 720);
 //	private final Lighting lighting = new LambertLighting();
-	private final Lighting lighting = new PhongLighting();
+	protected final Lighting lighting = new PhongLighting();
 
 	@Override
 	public void draw(List<Polygon> polygons, Point3D viewVector, GraphicsContext graphicsContext) {
@@ -35,7 +35,7 @@ public class PlaneShadingDrawerService extends WireDrawerService {
 		var sides = new ArrayList<Pixel>();
 
 		super.drawPolygon(polygon, viewVector, pixels, polygonColor, sides);
-		drawInnerPolygonPixels(pixels, sides, polygonColor);
+		drawInnerPolygonPixels(pixels, sides, polygonColor, viewVector);
 	}
 
 	private Color getPolygonColor(Polygon polygon, Point3D viewVector) {
@@ -70,7 +70,7 @@ public class PlaneShadingDrawerService extends WireDrawerService {
 		return Stream.of(first, second, third).anyMatch(Objects::isNull);
 	}
 
-	private void drawInnerPolygonPixels(int[] pixels, List<Pixel> sidePixels, Color color) {
+	protected void drawInnerPolygonPixels(int[] pixels, List<Pixel> sidePixels, Color color, Point3D viewVector) {
 		var minAndMaxY = getMinMaxY(sidePixels);
 		var minY = minAndMaxY.getKey();
 		var maxY = minAndMaxY.getValue();
@@ -88,19 +88,20 @@ public class PlaneShadingDrawerService extends WireDrawerService {
 			var dz = (endPixel.getZ() - startPixel.getZ()) / abs(endPixel.getX() - startPixel.getX());
 
 			for (int x = startPixel.getX(); x < endPixel.getX(); x++) {
-				drawPoint(pixels, x, y, z, color, new ArrayList<>());
+				drawPoint(pixels, x, y, z, color, new ArrayList<>(), viewVector, DEFAULT_NORMAL_VECTOR);
 				z += dz;
 			}
 		}
 	}
 
 	@Override
-	protected void drawPoint(int[] pixels, int x, int y, double z, Color color, List<Pixel> sidePixels) {
-		sidePixels.add(new Pixel(x, y, z, color));
+	protected void drawPoint(int[] pixels, int x, int y, double z, Color color, List<Pixel> sidePixels,
+							 Point3D viewVector, Point3D normalVector) {
+		sidePixels.add(new Pixel(x, y, z, color, normalVector));
 
 		if (validateCoordinate(x, y, z)) {
 			zBuffer.setValue(x, y, z);
-			super.drawPoint(pixels, x, y, z, color, sidePixels);
+			super.drawPoint(pixels, x, y, z, color, sidePixels, viewVector, normalVector);
 		}
 	}
 
@@ -110,7 +111,7 @@ public class PlaneShadingDrawerService extends WireDrawerService {
 				(z <= zBuffer.getValue(x, y));
 	}
 
-	private Pair<Integer, Integer> getMinMaxY(List<Pixel> sidePixels) {
+	protected Pair<Integer, Integer> getMinMaxY(List<Pixel> sidePixels) {
 		var sortedSidesPixels = sidePixels.stream()
 				.sorted(Comparator.comparing(Pixel::getY))
 				.toList();
@@ -118,7 +119,7 @@ public class PlaneShadingDrawerService extends WireDrawerService {
 		return getPair(sortedSidesPixels);
 	}
 
-	private Pair<Integer, Integer> getPair(List<Pixel> sortedSidesPixels) {
+	protected Pair<Integer, Integer> getPair(List<Pixel> sortedSidesPixels) {
 		var size = sortedSidesPixels.size();
 
 		return !sortedSidesPixels.isEmpty()
@@ -126,7 +127,7 @@ public class PlaneShadingDrawerService extends WireDrawerService {
 				: new Pair<>(null, null);
 	}
 
-	private Pair<Pixel, Pixel> getStartEndPixelsByY(List<Pixel> sidesPixels, int y) {
+	protected Pair<Pixel, Pixel> getStartEndPixelsByY(List<Pixel> sidesPixels, int y) {
 		val filteredSidesPixels = sidesPixels.stream()
 				.filter(pixel -> pixel.getY() == y)
 				.sorted(Comparator.comparing(Pixel::getX))

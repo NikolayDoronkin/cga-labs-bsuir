@@ -11,6 +11,6 @@ public class PolygonPoint {
 	private Point4D viewSpacePointVector = Point4D.of(0.0, 0.0, 0.0, 0.0);
 	private Point4D clipSpacePointVector = Point4D.of(0.0, 0.0, 0.0, 0.0);
 	private Point3D screenSpacePointVector = new Point3D(0, 0, 0);
-	private Point3D texturePoint;
-	private Point3D normalVector;
+	private Point3D texturePoint = null;
+	private Point3D normalVector = null;
 }
