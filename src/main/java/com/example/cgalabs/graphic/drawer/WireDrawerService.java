@@ -18,7 +18,7 @@ import java.util.List;
 import static java.lang.Math.abs;
 
 public class WireDrawerService implements DrawerService {
-	protected static final Color DEFAULT_PIXEL_COLOR = new Color(34, 34, 200);
+	protected static final Color DEFAULT_PIXEL_COLOR = new Color(5, 93, 167);
 	protected static final Point3D DEFAULT_NORMAL_VECTOR = new Point3D(0, 0, 0);
 
 	@Override

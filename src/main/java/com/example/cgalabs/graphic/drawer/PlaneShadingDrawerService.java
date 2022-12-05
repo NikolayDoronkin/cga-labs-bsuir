@@ -31,11 +31,12 @@ public class PlaneShadingDrawerService extends WireDrawerService {
 
 	@Override
 	protected void drawPolygon(Polygon polygon, Point3D viewVector, int[] pixels, Color color, List<Pixel> sidePixels) {
-		var polygonColor = Optional.ofNullable(getPolygonColor(polygon, viewVector)).orElse(DEFAULT_PIXEL_COLOR);
+//		ДЛЯ PhongShading НЕ ИСПОЛЬЗОВАТЬ СТРОКУ НИЖЕ
+//		var polygonColor = Optional.ofNullable(getPolygonColor(polygon, viewVector)).orElse(DEFAULT_PIXEL_COLOR);
 		var sides = new ArrayList<Pixel>();
 
-		super.drawPolygon(polygon, viewVector, pixels, polygonColor, sides);
-		drawInnerPolygonPixels(pixels, sides, polygonColor, viewVector);
+		super.drawPolygon(polygon, viewVector, pixels, color, sides);
+		drawInnerPolygonPixels(pixels, sides, color, viewVector);
 	}
 
 	private Color getPolygonColor(Polygon polygon, Point3D viewVector) {

@@ -85,7 +85,7 @@ public class PhongShadingDrawer extends PlaneShadingDrawerService {
 				p2 += 2 * dz;
 
 				if (!sameX) {
-					currNormal = add(currNormal, deltaNormal);
+					currNormal = currNormal.add(deltaNormal);
 				}
 
 				drawPoint(pixels, x1, y1, z1, color, sidePixels, viewVector, currNormal);
@@ -111,7 +111,7 @@ public class PhongShadingDrawer extends PlaneShadingDrawerService {
 				p2 += 2 * dz;
 
 				if (sameX) {
-					currNormal = add(currNormal, deltaNormal);
+					currNormal = currNormal.add(deltaNormal);
 				}
 
 				drawPoint(pixels, x1, y1, z1, color, sidePixels, viewVector, currNormal);
@@ -157,21 +157,20 @@ public class PhongShadingDrawer extends PlaneShadingDrawerService {
 			if (startPixel == null || endPixel == null) continue;
 
 			var z = startPixel.getZ();
-			var dz = (endPixel.getZ() - startPixel.getZ()) - abs(endPixel.getX() - startPixel.getX());
+			var dz = (endPixel.getZ() - startPixel.getZ()) / abs(endPixel.getX() - startPixel.getX());
 
 			var deltaNormal = endPixel.getNormalVector().subtract(startPixel.getNormalVector())
-					.multiply((double) 1 / (endPixel.getX() - startPixel.getX()));
+					.multiply((double) 1 / abs(endPixel.getX() - startPixel.getX()));
 
 			var currNormal = startPixel.getNormalVector();
 
 			for (int x = startPixel.getX(); x < endPixel.getX(); x++) {
-				currNormal = add(currNormal, deltaNormal);
+				currNormal = currNormal.add(deltaNormal);
 				drawPoint(pixels, x, y, z, color, sidePixels, viewVector, currNormal);
 				z += dz;
 			}
 		}
 	}
-
 
 	@Override
 	protected void drawPoint(int[] pixels, int x, int y, double z, Color color, List<Pixel> sidePixels,
@@ -179,12 +178,5 @@ public class PhongShadingDrawer extends PlaneShadingDrawerService {
 		var calculatedPixelColor = lighting.getPointColor(normalVector, viewVector, color);
 
 		super.drawPoint(pixels, x, y, z, calculatedPixelColor, sidePixels, viewVector, normalVector);
-	}
-
-	private Point3D add(Point3D first, Point3D second) {
-		return new Point3D(
-				first.getX() + second.getX(),
-				first.getY() + second.getY(),
-				first.getZ() + second.getZ());
 	}
 }
