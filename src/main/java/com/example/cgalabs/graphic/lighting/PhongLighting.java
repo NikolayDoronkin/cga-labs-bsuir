@@ -1,11 +1,21 @@
 package com.example.cgalabs.graphic.lighting;
 
 import com.example.cgalabs.model.Color;
+import com.example.cgalabs.model.Point4D;
+import com.example.cgalabs.model.Texture;
 import javafx.geometry.Point3D;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
+import java.util.Optional;
+
+import static com.example.cgalabs.engine.EngineBuilder.*;
 import static org.apache.commons.math3.util.FastMath.*;
 
-public class PhongLighting implements Lighting{
+public class PhongLighting implements Lighting {
+
+	private Texture diffuseTexture;
+	private Texture normalsTexture;
+	private Texture specularTexture;
 
 	private final Point3D lightVector = new Point3D(0f, 0f, 1f);
 	private final Point3D ambientLightCoefficient = new Point3D(0.2f, 0.2f, 0.2f);
@@ -17,11 +27,11 @@ public class PhongLighting implements Lighting{
 
 	@Override
 	public Color getPointColor(Point3D normalVector, Point3D viewVector, Color color) {
-		var ambientLight = calcAmbientLight();
-		var diffuseLight = calcDiffuseLight(normalVector, color);
-		var specularLight = calcSpecularLight(normalVector, viewVector);
+		var ambientLight = calcAmbientLight(ambientColor);
+		var diffuseLight = calcDiffuseLight(normalVector, color.getVector());
+		var specularLight = calcSpecularLight(normalVector, viewVector, reflectionColor);
 
-		var resultLightVector = add(ambientLight, diffuseLight, specularLight);
+		var resultLightVector = ambientLight.add(diffuseLight).add(specularLight);
 
 		return new Color(
 				(int) min(resultLightVector.getX(), 255),
@@ -30,30 +40,60 @@ public class PhongLighting implements Lighting{
 		);
 	}
 
-	private Point3D add(Point3D first, Point3D second, Point3D third) {
-		return new Point3D(
-				first.getX() + second.getX() + third.getX(),
-				first.getY() + second.getY() + third.getY(),
-				first.getZ() + second.getZ() + third.getZ());
+	public Color getTexturedPointColor(Point3D texel, Point3D viewVector) {
+		var diffuse = Optional.ofNullable(diffuseTexture).orElseThrow(RuntimeException::new);
+		var normals = Optional.ofNullable(normalsTexture).orElseThrow(RuntimeException::new);
+		var specular = Optional.ofNullable(specularTexture).orElseThrow(RuntimeException::new);
+
+		var x = (texel.getX() * diffuseTexture.getWidth()) % diffuseTexture.getWidth();
+		var y = ((1 - texel.getY()) * diffuseTexture.getHeight()) % diffuseTexture.getHeight();
+
+		if (x < 0 || y < 0) return new Color(0, 0, 0);
+
+		var normalVector = normalsTexture.get((int) (x + 0.5f), (int) (y + 0.5f));
+		normalVector = normalVector.subtract(new Point3D(127.5f, 127.5f, 127.5f));
+
+		var normalize = normalizeToPoint3D(normalVector);
+		normalVector = buildPoint3DTest(toViewSpaceMatrix
+				.multiply(buildMatrixTest(
+						Point4D.of(
+								normalize.getX(),
+								normalize.getY(),
+								normalize.getZ(), 0D))))
+				.normalize();
+
+		var colorFromDiffuseTexture = diffuseTexture.get((int) (x + 0.5f), (int) (y + 0.5f));
+		var reflectionColor = specularTexture.get((int) (x + 0.5f), (int) (y + 0.5f));
+
+		var ambientLight = calcAmbientLight(colorFromDiffuseTexture);
+		var diffuseLight = calcDiffuseLight(normalVector, colorFromDiffuseTexture);
+		var specularLight = calcSpecularLight(normalVector, viewVector, reflectionColor);
+
+		var resultLightVector = ambientLight.add(diffuseLight).add(specularLight);
+
+		return new Color(
+				(int) min(resultLightVector.getX(), 255f),
+				(int) min(resultLightVector.getY(), 255f),
+				(int) min(resultLightVector.getZ(), 255f));
 	}
 
-	private Point3D calcAmbientLight() {
-		return multiplyByCoordinates(ambientLightCoefficient, ambientColor);
+	private Point3D calcAmbientLight(Point3D color) {
+		return multiplyByCoordinates(ambientLightCoefficient, color);
 	}
 
-	private Point3D calcDiffuseLight(Point3D normalVector, Color color) {
+	private Point3D calcDiffuseLight(Point3D normalVector, Point3D color) {
 		var dotProduct = normalVector.normalize().dotProduct(lightVector.normalize());
 		var lightValue = max(dotProduct, 0f);
 
-		return multiplyByCoordinates(diffuseLightCoefficient.multiply(lightValue), color.getVector());
+		return multiplyByCoordinates(diffuseLightCoefficient.multiply(lightValue), color);
 	}
 
-	private Point3D calcSpecularLight(Point3D normalVector, Point3D viewVector) {
+	private Point3D calcSpecularLight(Point3D normalVector, Point3D viewVector, Point3D color) {
 		var reflectionVector = reflect(lightVector, normalVector);
 		var dotProduct = reflectionVector.normalize().dotProduct(viewVector.normalize());
 		var lightValue = pow(max(dotProduct, 0f), shininessCoefficient);
 
-		return multiplyByCoordinates(specularLightCoefficient.multiply(lightValue), reflectionColor);
+		return multiplyByCoordinates(specularLightCoefficient.multiply(lightValue), color);
 	}
 
 	private Point3D multiplyByCoordinates(Point3D first, Point3D second) {

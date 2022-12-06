@@ -5,4 +5,6 @@ import javafx.geometry.Point3D;
 
 public interface Lighting {
 	Color getPointColor(Point3D normalVector, Point3D viewVector, Color color);
+
+	Color getTexturedPointColor(Point3D texel, Point3D viewVector);
 }

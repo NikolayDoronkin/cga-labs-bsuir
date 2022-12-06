@@ -1,13 +1,13 @@
 package com.example.cgalabs.graphic.drawer;
 
+import com.example.cgalabs.HelloController;
+import com.example.cgalabs.graphic.lighting.LambertLighting;
 import com.example.cgalabs.graphic.lighting.Lighting;
 import com.example.cgalabs.graphic.lighting.PhongLighting;
-import com.example.cgalabs.model.Color;
-import com.example.cgalabs.model.Pixel;
-import com.example.cgalabs.model.Polygon;
-import com.example.cgalabs.model.ZBuffer;
+import com.example.cgalabs.model.*;
 import javafx.geometry.Point3D;
 import javafx.scene.canvas.GraphicsContext;
+import lombok.NoArgsConstructor;
 import lombok.val;
 import org.apache.commons.math3.util.Pair;
 
@@ -17,11 +17,21 @@ import java.util.stream.Stream;
 import static org.apache.commons.math3.util.FastMath.abs;
 import static org.apache.commons.math3.util.FastMath.round;
 
+@NoArgsConstructor
 public class PlaneShadingDrawerService extends WireDrawerService {
 
+	public PlaneShadingDrawerService(Texture diffuseTexture, Texture normalsTexture, Texture specularTexture) {
+		this.diffuseTexture = diffuseTexture;
+		this.normalsTexture = normalsTexture;
+		this.specularTexture = specularTexture;
+	}
+
 	protected final ZBuffer zBuffer = new ZBuffer(1280, 720);
-//	private final Lighting lighting = new LambertLighting();
-	protected final Lighting lighting = new PhongLighting();
+	protected final Lighting lighting = HelloController.PHONG_ENABLED ? new PhongLighting() : new LambertLighting();
+
+	protected Texture diffuseTexture;
+	protected Texture normalsTexture;
+	protected Texture specularTexture;
 
 	@Override
 	public void draw(List<Polygon> polygons, Point3D viewVector, GraphicsContext graphicsContext) {

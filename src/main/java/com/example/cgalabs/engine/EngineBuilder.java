@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.util.FastMath;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,9 +50,9 @@ public class EngineBuilder {
 	public static RealMatrix buildToViewSpaceMatrix(Vector3D cameraPosition,
 													Vector3D modelPosition,
 													Vector3D upCameraVector) {
-		var zAxisVector = normalize(cameraPosition.subtract(modelPosition));
-		var xAxisVector = normalize(upCameraVector.crossProduct(zAxisVector));
-		var yAxisVector = normalize(zAxisVector.crossProduct(xAxisVector));
+		var zAxisVector = normalizeToVector3D(cameraPosition.subtract(modelPosition));
+		var xAxisVector = normalizeToVector3D(upCameraVector.crossProduct(zAxisVector));
+		var yAxisVector = normalizeToVector3D(zAxisVector.crossProduct(xAxisVector));
 
 		var firstColumn = Point4D.of(xAxisVector.getX(), yAxisVector.getX(), zAxisVector.getX(), 0.0);
 		var secondColumn = Point4D.of(xAxisVector.getY(), yAxisVector.getY(), zAxisVector.getY(), 0.0);
@@ -67,10 +68,22 @@ public class EngineBuilder {
 		return toViewSpaceMatrix;
 	}
 
-	private static Vector3D normalize(Vector3D subtract) {
+	public static Vector3D normalizeToVector3D(Vector3D subtract) {
 		double s = subtract.getNorm();
 		if (s == 0.0D) {
 			return new Vector3D(Double.NaN, Double.NaN, Double.NaN);
+		} else {
+			return subtract.normalize();
+		}
+	}
+
+	public static Point3D normalizeToPoint3D(Point3D subtract) {
+		double s = FastMath.sqrt(
+				subtract.getX() * subtract.getX() +
+				subtract.getY() * subtract.getY() +
+						subtract.getZ() * subtract.getZ());
+		if (s == 0.0D) {
+			return new Point3D(Double.NaN, Double.NaN, Double.NaN);
 		} else {
 			return subtract.normalize();
 		}
@@ -139,7 +152,7 @@ public class EngineBuilder {
 				{firstColumn.getW(), secondColumn.getW(), thirdColumn.getW(), fourthColumn.getW()}});
 	}
 
-	private RealMatrix buildMatrixTest(Point4D point4D) {
+	public static RealMatrix buildMatrixTest(Point4D point4D) {
 		return MatrixUtils.createRealMatrix(new double[][]
 				{
 						{point4D.getX()},
@@ -155,7 +168,7 @@ public class EngineBuilder {
 		return Point4D.of(column[0], column[1], column[2], column[3]);
 	}
 
-	private Point3D buildPoint3DTest(RealMatrix matrix) {
+	public static Point3D buildPoint3DTest(RealMatrix matrix) {
 		var column = matrix.getColumn(0);
 
 		return new Point3D(column[0], column[1], column[2]);

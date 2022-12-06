@@ -19,4 +19,9 @@ public class LambertLighting implements Lighting {
 
 		return new Color(red, green, blue);
 	}
+
+	@Override
+	public Color getTexturedPointColor(Point3D texel, Point3D viewVector) {
+		throw new RuntimeException();
+	}
 }

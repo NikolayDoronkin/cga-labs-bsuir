@@ -3,14 +3,21 @@ package com.example.cgalabs.graphic.drawer;
 import com.example.cgalabs.model.Color;
 import com.example.cgalabs.model.Pixel;
 import com.example.cgalabs.model.PolygonPoint;
+import com.example.cgalabs.model.Texture;
 import javafx.geometry.Point3D;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.Objects;
 
 import static org.apache.commons.math3.util.FastMath.abs;
 
-public class PhongShadingDrawer extends PlaneShadingDrawerService {
+@NoArgsConstructor
+public class PhongShadingDrawerService extends PlaneShadingDrawerService {
+
+	public PhongShadingDrawerService(Texture diffuseTexture, Texture normalsTexture, Texture specularTexture) {
+		super(diffuseTexture, normalsTexture, specularTexture);
+	}
 
 	@Override
 	protected void drawSide(PolygonPoint firstSidePoint, PolygonPoint secondSidePoint, Color color, int[] pixels,

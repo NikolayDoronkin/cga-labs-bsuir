@@ -10,6 +10,7 @@ module com.example.cgalabs {
 	requires eu.hansolo.tilesfx;
 	requires javafx.graphics;
 	requires commons.math3;
+	requires org.apache.commons.lang3;
 	requires static lombok;
 
 	opens com.example.cgalabs to javafx.fxml;
