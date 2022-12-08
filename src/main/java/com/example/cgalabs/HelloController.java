@@ -17,11 +17,9 @@ import javafx.scene.input.ScrollEvent;
 import org.apache.commons.lang3.tuple.MutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 
-import static com.example.cgalabs.engine.CameraService.*;
+import static com.example.cgalabs.engine.CameraService.CAMERA_POSITION;
 
 public class HelloController {
 
@@ -97,6 +95,7 @@ public class HelloController {
 		handle();
 	}
 
+	//FIXME: Вынести чтение фотокарточек в ParserService.java
 	private static DrawerService getDrawerService() {
 		if (PHONG_ENABLED) {
 			if (TEXTURES_ENABLED) {

@@ -139,7 +139,7 @@ public class EngineBuilder {
 
 	private void calcScreenSpacePointVector(PolygonPoint polygonPoint) {
 		polygonPoint.setScreenSpacePointVector(
-				buildPoint3DTest(
+				buildPoint4DTest(
 						toScreenSpaceMatrix.multiply(
 								buildMatrixTest(polygonPoint.getClipSpacePointVector()))));
 	}

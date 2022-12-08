@@ -1,9 +1,6 @@
 package com.example.cgalabs.graphic.drawer;
 
-import com.example.cgalabs.model.Color;
-import com.example.cgalabs.model.Pixel;
-import com.example.cgalabs.model.Polygon;
-import com.example.cgalabs.model.PolygonPoint;
+import com.example.cgalabs.model.*;
 import javafx.geometry.Point3D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.PixelBuffer;
@@ -18,8 +15,10 @@ import java.util.List;
 import static java.lang.Math.abs;
 
 public class WireDrawerService implements DrawerService {
-	protected static final Color DEFAULT_PIXEL_COLOR = new Color(5, 93, 167);
+	protected static final Color DEFAULT_PIXEL_COLOR = new Color(128, 128, 128);
 	protected static final Point3D DEFAULT_NORMAL_VECTOR = new Point3D(0, 0, 0);
+	protected static final Point3D DEFAULT_TEXEL = new Point3D(0, 0, 0);
+	protected static final double DEFAULT_NW = 0;
 
 	@Override
 	public void draw(List<Polygon> polygons, Point3D viewVector, GraphicsContext graphicsContext) {
@@ -87,13 +86,15 @@ public class WireDrawerService implements DrawerService {
 		);
 	}
 
-	private Pixel getPixel(Point3D screenSpacePointVector, Color color) {
+	private Pixel getPixel(Point4D screenSpacePointVector, Color color) {
 		return new Pixel(
-				(int) screenSpacePointVector.getX(),
-				(int) screenSpacePointVector.getY(),
+				screenSpacePointVector.getX().intValue(),
+				screenSpacePointVector.getY().intValue(),
 				screenSpacePointVector.getZ(),
 				color,
-				DEFAULT_NORMAL_VECTOR);
+				DEFAULT_NW,
+				DEFAULT_NORMAL_VECTOR,
+				DEFAULT_TEXEL);
 	}
 
 	private boolean isVisible(Polygon polygon) {
@@ -116,7 +117,6 @@ public class WireDrawerService implements DrawerService {
 				thirdPointVector.getZ() - firstPointVector.getZ());
 
 		return firstVector.crossProduct(secondVector).normalize();
-
 	}
 
 	public void drawLine(Pixel startPoint, Pixel endPoint, Color color, List<Pixel> sidePixels, int[] pixels, Point3D viewVector) {
@@ -156,7 +156,7 @@ public class WireDrawerService implements DrawerService {
 				p1 += 2 * dy;
 				p2 += 2 * dz;
 
-				drawPoint(pixels, x1, y1, z1, color, sidePixels, viewVector, DEFAULT_NORMAL_VECTOR);
+				drawPoint(pixels, x1, y1, z1, color, sidePixels, viewVector, DEFAULT_NORMAL_VECTOR, DEFAULT_TEXEL, DEFAULT_NW);
 			}
 		} else if (dy >= dx && dy >= dz) {
 			var p1 = 2 * dx - dy;
@@ -178,7 +178,7 @@ public class WireDrawerService implements DrawerService {
 				p1 += 2 * dx;
 				p2 += 2 * dz;
 
-				drawPoint(pixels, x1, y1, z1, color, sidePixels, viewVector, DEFAULT_NORMAL_VECTOR);
+				drawPoint(pixels, x1, y1, z1, color, sidePixels, viewVector, DEFAULT_NORMAL_VECTOR, DEFAULT_TEXEL, DEFAULT_NW);
 			}
 		} else {
 			var p1 = 2 * dy - dz;
@@ -200,13 +200,13 @@ public class WireDrawerService implements DrawerService {
 				p1 += 2 * dy;
 				p2 += 2 * dx;
 
-				drawPoint(pixels, x1, y1, z1, color, sidePixels, viewVector, DEFAULT_NORMAL_VECTOR);
+				drawPoint(pixels, x1, y1, z1, color, sidePixels, viewVector, DEFAULT_NORMAL_VECTOR, DEFAULT_TEXEL, DEFAULT_NW);
 			}
 		}
 	}
 
 	protected void drawPoint(int[] arr, int x, int y, double z, Color color, List<Pixel> sidePixels,
-							 Point3D viewVector, Point3D normalVector) {
+							 Point3D viewVector, Point3D normalVector, Point3D texel, double nw) {
 		var pixelIndex = (x % 1280) + (y * 1280);
 
 		if (pixelIndex < 0 || pixelIndex >= arr.length) {

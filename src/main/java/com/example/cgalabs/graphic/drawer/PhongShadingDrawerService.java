@@ -1,5 +1,6 @@
 package com.example.cgalabs.graphic.drawer;
 
+import com.example.cgalabs.HelloController;
 import com.example.cgalabs.model.Color;
 import com.example.cgalabs.model.Pixel;
 import com.example.cgalabs.model.PolygonPoint;
@@ -22,28 +23,33 @@ public class PhongShadingDrawerService extends PlaneShadingDrawerService {
 	@Override
 	protected void drawSide(PolygonPoint firstSidePoint, PolygonPoint secondSidePoint, Color color, int[] pixels,
 							List<Pixel> sidesPixels, Point3D viewVector) {
-		var firstPointVector = firstSidePoint.getScreenSpacePointVector();
-		var firstPointNormalVector = firstSidePoint.getNormalVector();
+		var firstPointPixel = getSidePixel(firstSidePoint, color);
+		var secondPointPixel = getSidePixel(secondSidePoint, color);
 
-		if (Objects.isNull(firstPointNormalVector)) return;
-
-		var firstPointPixel = getSidePixel(firstPointVector, color, firstPointNormalVector);
-
-		var secondPointVector = secondSidePoint.getScreenSpacePointVector();
-		var secondPointNormalVector = secondSidePoint.getNormalVector();
-
-		if (Objects.isNull(secondPointNormalVector)) return;
-
-		var secondPointPixel = getSidePixel(secondPointVector, color, secondPointNormalVector);
+		if (Objects.isNull(firstPointPixel) || Objects.isNull(secondPointPixel)) return;
 
 		drawLine(firstPointPixel, secondPointPixel, color, sidesPixels, pixels, viewVector);
 	}
 
-	private Pixel getSidePixel(Point3D pointVector, Color color, Point3D normalVector) {
+	private Pixel getSidePixel(PolygonPoint sidePoint, Color color) {
+		var pointVector = sidePoint.getScreenSpacePointVector();
+		var normalVector = sidePoint.getNormalVector();
+		var texel = sidePoint.getTexturePoint();
+
+		if (Objects.isNull(normalVector) || Objects.isNull(texel)) return null;
+
+		if (!HelloController.TEXTURES_ENABLED) {
+			pointVector.setW(1D);
+		}
+
 		return new Pixel(
-				(int) pointVector.getX(),
-				(int) pointVector.getY(),
-				pointVector.getZ(), color, normalVector);
+				pointVector.getX().intValue(),
+				pointVector.getY().intValue(),
+				pointVector.getZ(),
+				color,
+				1 / pointVector.getW(),
+				normalVector.multiply(1 / pointVector.getW()),
+				texel.multiply(1 / pointVector.getW()));
 	}
 
 	@Override
@@ -65,11 +71,21 @@ public class PhongShadingDrawerService extends PlaneShadingDrawerService {
 		var zs = z2 > z1 ? 1 : -1;
 
 		var currNormal = startPoint.getNormalVector();
+		var currTexel = startPoint.getTexel();
+		var currNW = startPoint.getNw();
 		var sameX = abs(startPoint.getX() - endPoint.getX()) < abs(endPoint.getY() - startPoint.getY());
 
 		var deltaNormal = sameX
 				? endPoint.getNormalVector().subtract(startPoint.getNormalVector()).multiply((double) 1 / dy)
 				: endPoint.getNormalVector().subtract(startPoint.getNormalVector()).multiply((double) 1 / dx);
+
+		var deltaTexel = sameX
+				? endPoint.getTexel().subtract(startPoint.getTexel()).multiply((double) 1 / dy)
+				: endPoint.getTexel().subtract(startPoint.getTexel()).multiply((double) 1 / dx);
+
+		var deltaNW = sameX
+				? (endPoint.getNw() - startPoint.getNw()) / dy
+				: (endPoint.getNw() - startPoint.getNw()) / dx;
 
 		if (dx >= dy && dx >= dz) {
 			var p1 = 2 * dy - dx;
@@ -93,9 +109,11 @@ public class PhongShadingDrawerService extends PlaneShadingDrawerService {
 
 				if (!sameX) {
 					currNormal = currNormal.add(deltaNormal);
+					currTexel = currTexel.add(deltaTexel);
+					currNW += deltaNW;
 				}
 
-				drawPoint(pixels, x1, y1, z1, color, sidePixels, viewVector, currNormal);
+				drawPoint(pixels, x1, y1, z1, color, sidePixels, viewVector, currNormal, currTexel, currNW);
 			}
 		} else if (dy >= dx && dy >= dz) {
 			var p1 = 2 * dx - dy;
@@ -119,9 +137,11 @@ public class PhongShadingDrawerService extends PlaneShadingDrawerService {
 
 				if (sameX) {
 					currNormal = currNormal.add(deltaNormal);
+					currTexel = currTexel.add(deltaTexel);
+					currNW += deltaNW;
 				}
 
-				drawPoint(pixels, x1, y1, z1, color, sidePixels, viewVector, currNormal);
+				drawPoint(pixels, x1, y1, z1, color, sidePixels, viewVector, currNormal, currTexel, currNW);
 			}
 		} else {
 			var p1 = 2 * dy - dz;
@@ -143,7 +163,7 @@ public class PhongShadingDrawerService extends PlaneShadingDrawerService {
 				p1 += 2 * dy;
 				p2 += 2 * dx;
 
-				drawPoint(pixels, x1, y1, z1, color, sidePixels, viewVector, currNormal);
+				drawPoint(pixels, x1, y1, z1, color, sidePixels, viewVector, currNormal, currTexel, currNW);
 			}
 		}
 	}
@@ -168,12 +188,22 @@ public class PhongShadingDrawerService extends PlaneShadingDrawerService {
 
 			var deltaNormal = endPixel.getNormalVector().subtract(startPixel.getNormalVector())
 					.multiply((double) 1 / abs(endPixel.getX() - startPixel.getX()));
-
 			var currNormal = startPixel.getNormalVector();
+
+			var deltaTexel = (endPixel.getTexel().subtract(startPixel.getTexel()))
+					.multiply((double) 1 / abs(endPixel.getX() - startPixel.getX()));
+			var currTexel = startPixel.getTexel();
+
+			var deltaNW = (endPixel.getNw() - startPixel.getNw()) / (double) abs(endPixel.getX() - startPixel.getX());
+			var currNW = startPixel.getNw();
 
 			for (int x = startPixel.getX(); x < endPixel.getX(); x++) {
 				currNormal = currNormal.add(deltaNormal);
-				drawPoint(pixels, x, y, z, color, sidePixels, viewVector, currNormal);
+				currTexel = currTexel.add(deltaTexel);
+				currNW += deltaNW;
+
+				drawPoint(pixels, x, y, z, color, sidePixels, viewVector, currNormal, currTexel, currNW);
+
 				z += dz;
 			}
 		}
@@ -181,9 +211,11 @@ public class PhongShadingDrawerService extends PlaneShadingDrawerService {
 
 	@Override
 	protected void drawPoint(int[] pixels, int x, int y, double z, Color color, List<Pixel> sidePixels,
-							 Point3D viewVector, Point3D normalVector) {
-		var calculatedPixelColor = lighting.getPointColor(normalVector, viewVector, color);
+							 Point3D viewVector, Point3D normalVector, Point3D texel, double nw) {
+		var calculatedPixelColor = HelloController.TEXTURES_ENABLED
+				? lighting.getTexturedPointColor(texel.multiply(1 / nw), viewVector)
+				: lighting.getPointColor(normalVector, viewVector, color);
 
-		super.drawPoint(pixels, x, y, z, calculatedPixelColor, sidePixels, viewVector, normalVector);
+		super.drawPoint(pixels, x, y, z, calculatedPixelColor, sidePixels, viewVector, normalVector, texel, nw);
 	}
 }

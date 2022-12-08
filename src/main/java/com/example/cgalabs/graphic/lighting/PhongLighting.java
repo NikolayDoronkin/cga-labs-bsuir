@@ -4,7 +4,6 @@ import com.example.cgalabs.model.Color;
 import com.example.cgalabs.model.Point4D;
 import com.example.cgalabs.model.Texture;
 import javafx.geometry.Point3D;
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 import java.util.Optional;
 
@@ -13,9 +12,15 @@ import static org.apache.commons.math3.util.FastMath.*;
 
 public class PhongLighting implements Lighting {
 
-	private Texture diffuseTexture;
-	private Texture normalsTexture;
-	private Texture specularTexture;
+	private final Texture diffuseTexture;
+	private final Texture normalsTexture;
+	private final Texture specularTexture;
+
+	public PhongLighting(Texture diffuseTexture, Texture normalsTexture, Texture specularTexture) {
+		this.diffuseTexture = diffuseTexture;
+		this.normalsTexture = normalsTexture;
+		this.specularTexture = specularTexture;
+	}
 
 	private final Point3D lightVector = new Point3D(0f, 0f, 1f);
 	private final Point3D ambientLightCoefficient = new Point3D(0.2f, 0.2f, 0.2f);
@@ -45,12 +50,12 @@ public class PhongLighting implements Lighting {
 		var normals = Optional.ofNullable(normalsTexture).orElseThrow(RuntimeException::new);
 		var specular = Optional.ofNullable(specularTexture).orElseThrow(RuntimeException::new);
 
-		var x = (texel.getX() * diffuseTexture.getWidth()) % diffuseTexture.getWidth();
-		var y = ((1 - texel.getY()) * diffuseTexture.getHeight()) % diffuseTexture.getHeight();
+		var x = (texel.getX() * diffuse.getWidth()) % diffuse.getWidth();
+		var y = ((1 - texel.getY()) * diffuse.getHeight()) % diffuse.getHeight();
 
 		if (x < 0 || y < 0) return new Color(0, 0, 0);
 
-		var normalVector = normalsTexture.get((int) (x + 0.5f), (int) (y + 0.5f));
+		var normalVector = normals.get((int) (x), (int) (y));
 		normalVector = normalVector.subtract(new Point3D(127.5f, 127.5f, 127.5f));
 
 		var normalize = normalizeToPoint3D(normalVector);
@@ -62,8 +67,8 @@ public class PhongLighting implements Lighting {
 								normalize.getZ(), 0D))))
 				.normalize();
 
-		var colorFromDiffuseTexture = diffuseTexture.get((int) (x + 0.5f), (int) (y + 0.5f));
-		var reflectionColor = specularTexture.get((int) (x + 0.5f), (int) (y + 0.5f));
+		var colorFromDiffuseTexture = diffuse.get((int) (x), (int) (y));
+		var reflectionColor = specular.get((int) (x), (int) (y));
 
 		var ambientLight = calcAmbientLight(colorFromDiffuseTexture);
 		var diffuseLight = calcDiffuseLight(normalVector, colorFromDiffuseTexture);

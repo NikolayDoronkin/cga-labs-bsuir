@@ -24,10 +24,14 @@ public class PlaneShadingDrawerService extends WireDrawerService {
 		this.diffuseTexture = diffuseTexture;
 		this.normalsTexture = normalsTexture;
 		this.specularTexture = specularTexture;
+
+		lighting = HelloController.PHONG_ENABLED
+				? new PhongLighting(diffuseTexture, normalsTexture, specularTexture)
+				: new LambertLighting();
 	}
 
 	protected final ZBuffer zBuffer = new ZBuffer(1280, 720);
-	protected final Lighting lighting = HelloController.PHONG_ENABLED ? new PhongLighting() : new LambertLighting();
+	protected Lighting lighting;
 
 	protected Texture diffuseTexture;
 	protected Texture normalsTexture;
@@ -99,7 +103,7 @@ public class PlaneShadingDrawerService extends WireDrawerService {
 			var dz = (endPixel.getZ() - startPixel.getZ()) / abs(endPixel.getX() - startPixel.getX());
 
 			for (int x = startPixel.getX(); x < endPixel.getX(); x++) {
-				drawPoint(pixels, x, y, z, color, new ArrayList<>(), viewVector, DEFAULT_NORMAL_VECTOR);
+				drawPoint(pixels, x, y, z, color, new ArrayList<>(), viewVector, DEFAULT_NORMAL_VECTOR, DEFAULT_TEXEL, DEFAULT_NW);
 				z += dz;
 			}
 		}
@@ -107,12 +111,12 @@ public class PlaneShadingDrawerService extends WireDrawerService {
 
 	@Override
 	protected void drawPoint(int[] pixels, int x, int y, double z, Color color, List<Pixel> sidePixels,
-							 Point3D viewVector, Point3D normalVector) {
-		sidePixels.add(new Pixel(x, y, z, color, normalVector));
+							 Point3D viewVector, Point3D normalVector, Point3D texel, double nw) {
+		sidePixels.add(new Pixel(x, y, z, color, nw, normalVector, texel));
 
 		if (validateCoordinate(x, y, z)) {
 			zBuffer.setValue(x, y, z);
-			super.drawPoint(pixels, x, y, z, color, sidePixels, viewVector, normalVector);
+			super.drawPoint(pixels, x, y, z, color, sidePixels, viewVector, normalVector, texel, nw);
 		}
 	}
 

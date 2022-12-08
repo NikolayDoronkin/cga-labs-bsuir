@@ -13,13 +13,10 @@ public class Texture {
 	private static final int GREEN_PIXEL_PART_SHIFT = 8;
 	private static final int AND_PIXEL_PART_MULTIPLIER = 0xFF;
 
-	@Getter
 	private Image image;
 
-	@Getter
 	private double width;
 
-	@Getter
 	private double height;
 
 	public Texture(Image image) {
