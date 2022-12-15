@@ -2,10 +2,7 @@ package com.example.cgalabs.graphic.drawer;
 
 import com.example.cgalabs.graphic.lighting.Lighting;
 import com.example.cgalabs.graphic.lighting.PhongLighting;
-import com.example.cgalabs.model.Color;
-import com.example.cgalabs.model.Pixel;
-import com.example.cgalabs.model.Polygon;
-import com.example.cgalabs.model.ZBuffer;
+import com.example.cgalabs.model.*;
 import javafx.geometry.Point3D;
 import javafx.scene.canvas.GraphicsContext;
 import lombok.val;
@@ -89,7 +86,7 @@ public class PlaneShadingDrawerService extends WireDrawerService {
 			var dz = (endPixel.getZ() - startPixel.getZ()) / abs(endPixel.getX() - startPixel.getX());
 
 			for (int x = startPixel.getX(); x < endPixel.getX(); x++) {
-				drawPoint(pixels, x, y, z, color, new ArrayList<>(), viewVector, DEFAULT_NORMAL_VECTOR);
+				drawPoint(pixels, x, y, z, color, new ArrayList<>(), viewVector, DEFAULT_NORMAL_VECTOR, OF_DEFAULT);
 				z += dz;
 			}
 		}
@@ -97,12 +94,12 @@ public class PlaneShadingDrawerService extends WireDrawerService {
 
 	@Override
 	protected void drawPoint(int[] pixels, int x, int y, double z, Color color, List<Pixel> sidePixels,
-							 Point3D viewVector, Point3D normalVector) {
-		sidePixels.add(new Pixel(x, y, z, color, normalVector));
+							 Point3D viewVector, Point3D normalVector, Point4D currPosition) {
+		sidePixels.add(new Pixel(x, y, z, color, normalVector, currPosition));
 
 		if (validateCoordinate(x, y, z)) {
 			zBuffer.setValue(x, y, z);
-			super.drawPoint(pixels, x, y, z, color, sidePixels, viewVector, normalVector);
+			super.drawPoint(pixels, x, y, z, color, sidePixels, viewVector, normalVector, OF_DEFAULT);
 		}
 	}
 

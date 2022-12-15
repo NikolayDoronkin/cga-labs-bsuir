@@ -12,4 +12,5 @@ public class Pixel {
 	private double z;
 	private Color color;
 	private Point3D normalVector;
+	private Point4D currentPoint;
 }
